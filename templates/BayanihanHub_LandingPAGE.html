@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BayanihanHub | Empowering the People of Cebu</title>
+
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#004ac6",
+            "primary-container": "#2563eb",
+            "on-surface": "#0f172a",
+            "on-surface-variant": "#434655",
+            "surface-container-low": "#f0f2f5",
+            "outline-variant": "#cbd5e1",
+          },
+          fontFamily: {
+            "h1": ["Manrope"], "body": ["Manrope"],
+          },
+        },
+      },
+    }
+  </script>
+  
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Manrope', sans-serif; background-color: #f8f9fc; color: #0f172a; -webkit-font-smoothing: antialiased; }
+
+    .page-bg {
+      background-color: #f8f9fc;
+      background-image:
+        radial-gradient(at 0% 0%, rgba(59,130,246,0.04) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(16,185,129,0.04) 0px, transparent 50%);
+    }
+    .glass-card { background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); border: 1px solid rgba(226,232,240,0.9); }
+    .card-shadow { box-shadow: 0 4px 24px -6px rgba(0,0,0,0.08), 0 1px 4px -1px rgba(0,0,0,0.04); }
+    .card-shadow-hover:hover { box-shadow: 0 12px 40px -10px rgba(0,0,0,0.12), 0 2px 8px -2px rgba(0,0,0,0.06); }
+    .material-symbols-outlined { font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24; }
+
+    /* Scroll reveal */
+    [data-reveal] { opacity: 1; transform: translateY(22px); transition: opacity 0.55s cubic-bezier(0.22,1,0.36,1), transform 0.55s cubic-bezier(0.22,1,0.36,1); }
+    [data-reveal].is-visible { opacity: 1; transform: translateY(0); }
+    [data-reveal][data-delay="100"] { transition-delay: 0.1s; }
+    [data-reveal][data-delay="200"] { transition-delay: 0.2s; }
+    [data-reveal][data-delay="300"] { transition-delay: 0.3s; }
+    [data-reveal][data-delay="400"] { transition-delay: 0.4s; }
+    [data-reveal][data-delay="500"] { transition-delay: 0.5s; }
+    .hero-reveal { opacity: 0; transform: translateY(18px); animation: heroIn 0.65s cubic-bezier(0.22,1,0.36,1) both; }
+    .hero-reveal.delay-200 { animation-delay: 0.2s; }
+    .hero-reveal.delay-500 { animation-delay: 0.5s; }
+    @keyframes heroIn { to { opacity: 1; transform: translateY(0); } }
+
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(6px); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    .modal-box { background: #fff; border-radius: 2rem; width: 100%; max-width: 460px; padding: 2.5rem; transform: translateY(16px) scale(0.98); transition: transform 0.3s cubic-bezier(0.22,1,0.36,1); box-shadow: 0 32px 80px -16px rgba(0,0,0,0.22); }
+    .modal-overlay.active .modal-box { transform: translateY(0) scale(1); }
+
+    /* Toast */
+    #toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #0f172a; color: #fff; padding: 0.875rem 1.25rem; border-radius: 1rem; font-size: 0.85rem; font-weight: 600; z-index: 200; display: flex; align-items: center; gap: 0.625rem; opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity 0.25s, transform 0.25s; max-width: 320px; }
+    #toast.show { opacity: 1; transform: translateY(0); pointer-events: all; }
+
+    /* Lang transition */
+    [data-en], [data-ceb] { transition: opacity 0.15s; }
+
+    /* News extra cards hidden by default */
+    .news-extra { display: none; }
+    .news-extra.visible { display: block; }
+
+    /* Nav active link */
+    .nav-link { position: relative; }
+    .nav-link::after { content:''; position: absolute; bottom: -2px; left: 0; right: 0; height: 2px; background: #2563eb; border-radius: 99px; transform: scaleX(0); transition: transform 0.2s; }
+    .nav-link:hover::after { transform: scaleX(1); }
+
+    /* Input focus ring */
+    .inp { width:100%; border:1.5px solid #e2e8f0; border-radius:0.875rem; padding:0.75rem 1rem; font-size:0.9rem; outline:none; transition:border-color 0.2s, box-shadow 0.2s; font-family:'Manrope',sans-serif; }
+    .inp:focus { border-color:#3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+
+    /* Step badge */
+    .step-badge { font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; margin-bottom:.5rem; }
+
+    /* Share tooltip */
+    .share-btn { position: relative; }
+    .share-btn .tooltip { position:absolute; bottom:calc(100% + 6px); right:0; background:#0f172a; color:#fff; font-size:0.7rem; font-weight:600; white-space:nowrap; padding:4px 10px; border-radius:6px; opacity:0; pointer-events:none; transition:opacity 0.15s; }
+    .share-btn:hover .tooltip { opacity:1; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+
+    @keyframes scaleUp {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .animate-scale-up { animation: scaleUp 0.3s ease-out forwards; }
+
+    /* Loading Overlay */
+    #loadingOverlay {
+      position: fixed; inset: 0; background: white; z-index: 9999;
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+    }
+
+    /* Jumping Animation */
+    .jumping-logo {
+      width: 80px; height: 80px;
+      animation: jump 0.6s ease-in-out infinite alternate;
+    }
+
+    @keyframes jump {
+      from { transform: translateY(0); }
+      to { transform: translateY(-20px); }
+    }
+
+    /* Eye Icon Button */
+    .eye-btn {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      color: #94a3b8; cursor: pointer; border: none; background: none;
+    }
+  </style>
+</head>
+
+<body class="page-bg">
+
+  <div id="loadingOverlay">
+    <img src="{{ url_for('static', filename='Images/BAYANIHUB_LOGO.png') }}" class="jumping-logo" alt="Loading...">
+    <p style="margin-top:20px; font-weight:bold; color:#1d4ed8;">Connecting to BayanihanHub...</p>
+  </div>
+
+  <div class="modal-overlay" id="loginModal" role="dialog" aria-modal="true">
+    <div class="modal-box p-8 md:p-10" style="max-width: 460px;">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-extrabold text-blue-800">Welcome back</h2>
+        <button onclick="closeModal('loginModal')" class="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+          <span class="material-symbols-outlined text-slate-400">close</span>
+        </button>
+      </div>
+      <p class="text-slate-500 text-sm mb-6">Please enter your details to sign in.</p>
+      
+      <form class="space-y-4" onsubmit="handleLogin(event)">
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-slate-500 uppercase">Email Address</label>
+          <input type="email" id="loginEmail" class="inp" placeholder="name@example.com" required/>
+        </div>
+        
+        <div class="relative">
+          <input type="password" id="loginPassword" class="inp" placeholder="••••••••" required/>
+          <button type="button" onclick="togglePass('loginPassword', this)" class="eye-btn material-symbols-outlined">visibility</button>
+        </div>
+        
+        <div class="flex items-center justify-between pt-2">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-blue-700 focus:ring-blue-700"/>
+            <span class="text-sm text-slate-500">Remember me</span>
+          </label>
+          <a href="#" onclick="switchModal('loginModal', 'forgotModal')" class="text-sm text-blue-700 hover:text-blue-800 font-semibold">Forgot Password?</a>
+        </div>
+        
+        <button type="submit" class="w-full bg-blue-700 text-white py-3.5 rounded-xl font-bold text-sm hover:bg-blue-800 active:scale-95 transition-all shadow-lg mt-4">Login</button>
+      </form>
+
+      <!-- ─── FORGOT PASSWORD MODAL ─── -->
+  <div class="modal-overlay hidden" id="forgotModal" role="dialog" aria-modal="true">
+    <div class="modal-box p-8 md:p-10" style="max-width: 460px;">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-extrabold text-blue-800">Reset Password</h2>
+        <button onclick="closeModal('forgotModal')"><span class="material-symbols-outlined text-slate-400">close</span></button>
+      </div>
+      
+      <div id="forgotStep1" class="space-y-4 animate-fade-in">
+        <p class="text-slate-500 text-sm">Enter your registered email address to receive a reset code.</p>
+        <div class="space-y-1">
+          <input type="email" id="resetEmail" class="inp" placeholder="name@example.com" required/>
+        </div>
+        <button type="button" onclick="sendResetOTP()" class="w-full bg-blue-700 text-white py-3.5 rounded-xl font-bold mt-4 shadow-lg hover:bg-blue-800 active:scale-95 transition-all">Send Reset Code</button>
+      </div>
+
+      <div id="forgotStep2" class="hidden space-y-4 animate-scale-up">
+        <p class="text-slate-500 text-sm">Enter the 6-digit code sent to your email and your new password.</p>
+        
+        <input type="text" id="resetOTP" maxlength="6" class="w-full border-2 border-blue-100 rounded-2xl py-3 text-center text-2xl font-black tracking-[0.5em] text-blue-700 focus:border-blue-500 outline-none" placeholder="000000" required/>
+        
+        <div class="relative">
+          <input type="password" id="newPassword" class="inp" placeholder="New Password" required/>
+          <button type="button" onclick="togglePass('newPassword', this)" class="eye-btn material-symbols-outlined">visibility</button>
+        </div>
+        
+        <button type="button" onclick="submitNewPassword()" class="w-full bg-emerald-600 text-white py-3.5 rounded-xl font-bold mt-4 shadow-lg hover:bg-emerald-700 active:scale-95 transition-all">Update Password</button>
+      </div>
+      
+      <p class="text-center text-sm text-slate-500 mt-6">
+        Remembered it? <a href="#" onclick="switchModal('forgotModal', 'loginModal')" class="text-blue-700 font-bold hover:underline">Log In</a>
+      </p>
+    </div>
+  </div>
+      
+      <p class="text-center text-sm text-slate-500 mt-6">
+        Don't have an account? <a href="#" onclick="switchModal('loginModal', 'signupModal')" class="text-blue-700 font-bold hover:underline">Sign Up</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="signupModal" role="dialog" aria-modal="true">
+    <div class="modal-box p-8 md:p-10 transition-all duration-500 ease-in-out" style="max-width: 480px; border-radius: 2rem;">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-3xl font-extrabold text-blue-900 tracking-tight">Create Account</h2>
+        <button onclick="closeModal('signupModal')" class="w-10 h-10 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+          <span class="material-symbols-outlined text-slate-400">close</span>
+        </button>
+      </div>
+      <p class="text-slate-500 text-sm mb-8">Be part of the solution in your community.</p>
+      
+      <form class="space-y-5" id="signupForm" onsubmit="handleSignupSubmit(event)">
+        
+        <div id="signupStep1" class="space-y-4 animate-fade-in">
+          <div class="space-y-3">
+            <div class="relative">
+              <input type="text" id="regName" class="inp pl-11" placeholder="Full Name" required/>
+              <span class="material-symbols-outlined absolute left-3.5 top-3 text-slate-400">person</span>
+            </div>
+            <div class="relative">
+              <input type="email" id="regEmail" class="inp pl-11" placeholder="Email Address" required/>
+              <span class="material-symbols-outlined absolute left-3.5 top-3 text-slate-400">mail</span>
+            </div>
+            <div class="relative">
+              <input type="password" id="regPass" class="inp pl-11" placeholder="Create Password" required/>
+              <span class="material-symbols-outlined absolute left-3.5 top-3 text-slate-400">lock</span>
+              <button type="button" onclick="togglePass('regPass', this)" class="eye-btn material-symbols-outlined">visibility</button>
+            </div>
+            <div class="relative">
+              <input type="tel" id="phoneNumber" class="inp pl-11" placeholder="09XX XXX XXXX" required/>
+              <span class="material-symbols-outlined absolute left-3.5 top-3 text-slate-400">smartphone</span>
+            </div>
+          </div>
+          <button type="button" onclick="triggerOTP()" class="w-full bg-blue-700 text-white py-4 rounded-2xl font-bold text-sm hover:bg-blue-800 active:scale-95 transition-all shadow-xl shadow-blue-100 mt-4 flex items-center justify-center gap-2">
+            <span>Send Verification Code</span>
+            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+          </button>
+        </div>
+
+        <div id="signupStep2" class="hidden space-y-6 animate-scale-up">
+          <div class="text-center space-y-2">
+            <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <span class="material-symbols-outlined text-3xl">mark_email_read</span>
+            </div>
+            <h3 class="font-bold text-slate-800">Check your Inbox</h3>
+            <p class="text-xs text-slate-500">I-type ang 6-digit code na pinadala namin.</p>
+          </div>
+          <div class="relative">
+            <input type="text" id="otpCodeInput" maxlength="6" 
+                   class="w-full border-2 border-blue-100 rounded-2xl py-5 text-center text-3xl font-black tracking-[0.5em] text-blue-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 transition-all outline-none" 
+                   placeholder="000000" required/>
+          </div>
+          <button type="submit" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold text-sm hover:bg-emerald-700 active:scale-95 transition-all shadow-xl shadow-emerald-100">
+            Verify & Get Started
+          </button>
+          <button type="button" onclick="goBackToStep1()" class="w-full text-xs text-slate-400 hover:text-blue-600 font-medium transition-colors">
+            Wrong details? Go back and edit.
+          </button>
+        </div>
+        
+      </form>
+      
+      <p class="text-center text-sm text-slate-500 mt-8">
+        Already a member? <a href="#" onclick="switchModal('signupModal', 'loginModal')" class="text-blue-700 font-bold hover:underline">Log In</a>
+      </p>
+    </div>
+  </div>
+  
+  <div class="modal-overlay" id="shareModal">
+    <div class="modal-box" style="max-width:380px;">
+      <div class="flex items-center justify-between mb-5">
+        <h2 style="font-size:1.1rem;font-weight:800;" class="text-slate-900">Share this article</h2>
+        <button onclick="closeModal('shareModal')" class="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+          <span class="material-symbols-outlined text-slate-400">close</span>
+        </button>
+      </div>
+      <div id="shareArticleTitle" class="text-sm font-semibold text-slate-700 bg-slate-50 rounded-xl p-3 mb-5 border border-slate-100"></div>
+      <div class="grid grid-cols-3 gap-3 mb-5">
+        <button onclick="shareVia('facebook')" class="flex flex-col items-center gap-2 p-4 rounded-2xl bg-blue-50 hover:bg-blue-100 transition-colors group">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#1877f2"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.413c0-3.025 1.792-4.697 4.533-4.697 1.313 0 2.686.236 2.686.236v2.971h-1.513c-1.491 0-1.956.93-1.956 1.886v2.264h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg>
+          <span class="text-xs font-bold text-slate-600">Facebook</span>
+        </button>
+        <button onclick="shareVia('twitter')" class="flex flex-col items-center gap-2 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#0f1419"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.632zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          <span class="text-xs font-bold text-slate-600">X / Twitter</span>
+        </button>
+        <button onclick="shareVia('copy')" class="flex flex-col items-center gap-2 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors">
+          <span class="material-symbols-outlined text-slate-600" style="font-size:22px;">link</span>
+          <span class="text-xs font-bold text-slate-600">Copy Link</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast">
+    <span class="material-symbols-outlined" id="toastIcon" style="font-size:18px;color:#4ade80;">check_circle</span>
+    <span id="toastMsg">Done!</span>
+  </div>
+
+  <nav class="bg-white/80 backdrop-blur-xl fixed top-0 w-full z-50 border-b border-slate-200" style="height:64px;">
+    <div class="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <img src="{{ url_for('static', filename='Images/BAYANIHUB_LOGO.png') }}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt="BayaniHub Logo" class="h-9 w-9 rounded-xl shadow-sm"/>
+        <div style="display:none;width:36px;height:36px;background:#1d4ed8;border-radius:10px;align-items:center;justify-content:center;">
+          <span class="material-symbols-outlined text-white" style="font-size:20px;">location_city</span>
+        </div>
+        <span style="font-size:19px; font-weight:800; letter-spacing:-0.03em;" class="text-slate-900">BayaniHub</span>
+      </div>
+      <div class="hidden md:flex items-center gap-7">
+        <a href="#how-it-works" class="nav-link text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors" data-en="How It Works" data-ceb="Unsaon Paggamit">How It Works</a>
+        <a href="#updates" class="nav-link text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors" data-en="Updates" data-ceb="Mga Balita">Updates</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="hidden md:flex bg-slate-100 p-1 rounded-full border border-slate-200">
+          <button id="btnEng" onclick="setLang('en')" class="px-4 py-1.5 rounded-full text-xs font-bold bg-white text-blue-700 shadow-sm transition-all">ENG</button>
+          <button id="btnCeb" onclick="setLang('ceb')" class="px-4 py-1.5 rounded-full text-xs font-bold text-slate-500 hover:text-slate-800 transition-all">CEB</button>
+        </div>
+        <button onclick="openModal('loginModal')" class="bg-blue-700 text-white px-5 py-2 rounded-xl text-sm font-bold hover:bg-blue-800 hover:shadow-lg hover:shadow-blue-700/20 active:scale-95 transition-all" data-en="Go to Dashboard" data-ceb="Adto sa Dashboard">
+            Go to Dashboard
+        </button>
+        </div>
+    </div>
+  </nav>
+
+  <main style="padding-top:64px;">
+    <section class="py-24 md:py-32" id="hero">
+      <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div class="hero-reveal">
+          <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-blue-50 text-blue-700 text-xs font-bold border border-blue-100 uppercase tracking-wide mb-8">
+            <span class="material-symbols-outlined" style="font-size:14px;">verified</span>
+            <span data-en="Official Platform for Cebu City" data-ceb="Opisyal nga Plataporma sa Dakbayan sa Cebu">Official Platform for Cebu City</span>
+          </span>
+          <h1 style="font-size:clamp(2.5rem,6vw,4rem); font-weight:800; line-height:1.1; letter-spacing:-0.03em;" class="text-slate-900 mb-6">
+            <span data-en="Empowering the" data-ceb="Pagpalakas sa">Empowering the</span><br/>
+            <span class="bg-gradient-to-r from-blue-600 to-emerald-600 bg-clip-text text-transparent" data-en="Heart of Cebu" data-ceb="Puso ng Cebu">Heart of Cebu</span>
+          </h1>
+          <p class="text-lg text-slate-600 leading-relaxed mb-10 max-w-lg" data-en="Access essential barangay services, report community concerns, and stay updated with official city initiatives through your digital neighbor." data-ceb="I-access ang mga serbisyo sa barangay, i-report ang mga alalahanin, ug maabante sa mga opisyal nga inisyatibo pinaagi sa inyong digital nga silingan.">
+            Access essential barangay services, report community concerns, and stay updated with official city initiatives through your digital neighbor.
+          </p>
+          <button onclick="scrollToSection('how-it-works')" class="bg-blue-700 text-white px-8 py-4 rounded-2xl font-bold text-base shadow-xl shadow-blue-700/25 hover:bg-blue-800 hover:-translate-y-0.5 active:scale-95 transition-all" data-en="Get Started" data-ceb="Magsugod">
+            Get Started
+          </button>
+        </div>
+        <div class="hero-reveal delay-200 relative">
+          <div class="rounded-[2.5rem] overflow-hidden border-8 border-white card-shadow group">
+            <img src="{{ url_for('static', filename='Images/Screenshot 2026-04-29 234734.png') }}" alt="Community Hub Update" class="w-full h-[520px] object-cover transition-transform duration-700 group-hover:scale-105"/>
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent rounded-[2.5rem] pointer-events-none"></div>
+            <div class="absolute bottom-7 left-7 right-7 bg-white/90 backdrop-blur-md p-5 rounded-2xl flex items-center gap-4 card-shadow hero-reveal delay-500">
+              <div class="bg-blue-700 text-white p-3 rounded-xl shrink-0">
+                <span class="material-symbols-outlined text-xl">real_estate_agent</span>
+              </div>
+              <div>
+                <p class="text-slate-900 font-bold text-sm" data-en="New Community Hub" data-ceb="Bag-ong Community Hub">New Community Hub</p>
+                <p class="text-xs text-slate-500 mt-0.5" data-en="Central Cebu Barangay Office · 2 mins ago" data-ceb="Sentral Cebu Barangay Office · 2 minuto ang milabay">Central Cebu Barangay Office · 2 mins ago</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-24" id="how-it-works">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center mb-16" data-reveal>
+          <h2 style="font-size:2.25rem; font-weight:800; letter-spacing:-0.02em;" class="text-slate-900 mb-4" data-en="Transparency in Action" data-ceb="Transparency sa Aksyon">Transparency in Action</h2>
+          <p class="text-slate-600 text-lg max-w-xl mx-auto" data-en="A seamless digital process designed to keep every Citizen informed and empowered." data-ceb="Usa ka padayon nga digital nga proseso nga gidisenyo aron mapahibalo ug mahatagan og gahom ang matag Lungsoranon.">A seamless digital process designed to keep every Citizen informed and empowered.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div class="glass-card card-shadow card-shadow-hover p-9 rounded-3xl transition-all group cursor-pointer" data-reveal data-delay="100" onclick="showStepDetail(1)">
+            <div class="w-14 h-14 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-center mb-7 group-hover:scale-110 transition-transform">
+              <span class="material-symbols-outlined text-blue-600 text-2xl">photo_camera</span>
+            </div>
+            <p class="step-badge text-blue-600" data-en="Step 1" data-ceb="Lakang 1">Step 1</p>
+            <h3 style="font-size:1.2rem; font-weight:700;" class="text-slate-900 mb-3" data-en="Snap & Report" data-ceb="Kuha & I-report">Snap & Report</h3>
+            <p class="text-slate-600 text-sm leading-relaxed" data-en="Take a photo, select a category, and submit instantly from your phone with geotagged accuracy." data-ceb="Kumuha og litrato, pilii ang kategorya, ug i-submit dayon gikan sa inyong telepono nga may geotagged nga katukma.">Take a photo, select a category, and submit instantly from your phone with geotagged accuracy.</p>
+          </div>
+          <div class="glass-card card-shadow card-shadow-hover p-9 rounded-3xl transition-all group cursor-pointer" data-reveal data-delay="200" onclick="showStepDetail(2)">
+            <div class="w-14 h-14 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center justify-center mb-7 group-hover:scale-110 transition-transform">
+              <span class="material-symbols-outlined text-emerald-600 text-2xl">sync_alt</span>
+            </div>
+            <p class="step-badge text-emerald-600" data-en="Step 2" data-ceb="Lakang 2">Step 2</p>
+            <h3 style="font-size:1.2rem; font-weight:700;" class="text-slate-900 mb-3" data-en="Track Progress" data-ceb="Sunda ang Progreso">Track Progress</h3>
+            <p class="text-slate-600 text-sm leading-relaxed" data-en="Get live notifications as officials review, validate, and assign tasks to the right teams." data-ceb="Makadawat og live nga mga abiso samtang ginareview, gi-validate, ug gi-assigned sa mga opisyal ang mga buluhaton.">Get live notifications as officials review, validate, and assign tasks to the right teams.</p>
+          </div>
+          <div class="glass-card card-shadow card-shadow-hover p-9 rounded-3xl transition-all group cursor-pointer" data-reveal data-delay="300" onclick="showStepDetail(3)">
+            <div class="w-14 h-14 bg-orange-50 border border-orange-100 rounded-2xl flex items-center justify-center mb-7 group-hover:scale-110 transition-transform">
+              <span class="material-symbols-outlined text-orange-500 text-2xl">verified</span>
+            </div>
+            <p class="step-badge text-orange-500" data-en="Step 3" data-ceb="Lakang 3">Step 3</p>
+            <h3 style="font-size:1.2rem; font-weight:700;" class="text-slate-900 mb-3" data-en="Issue Resolved" data-ceb="Narisolba na ang Isyu">Issue Resolved</h3>
+            <p class="text-slate-600 text-sm leading-relaxed" data-en="Receive a final update with photo proof once the improvement is complete. Your voice matters." data-ceb="Makadawat og katapusang update nga may litrato sa katapusan. Ang inyong tingog importante.">Receive a final update with photo proof once the improvement is complete. Your voice matters.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-24" id="updates">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12" data-reveal>
+          <div>
+            <h2 style="font-size:2rem; font-weight:800; letter-spacing:-0.02em;" class="text-slate-900 mb-2" data-en="Community Updates" data-ceb="Mga Update sa Komunidad">Community Updates</h2>
+            <p class="text-slate-600" data-en="Stay informed about the latest news and progress in Cebu City." data-ceb="Mahibalo sa pinakabag-o nga balita sa Cebu City.">Stay informed about the latest news and progress in Cebu.</p>
+          </div>
+          <button id="viewAllBtn" onclick="toggleAllNews()" class="text-blue-700 font-bold flex items-center gap-2 hover:translate-x-1 transition-transform text-sm" data-en="View All News" data-ceb="Tan-awa Tanan nga Balita">
+            <span id="viewAllLabel">View All News</span> <span class="material-symbols-outlined text-lg" id="viewAllIcon">arrow_right_alt</span>
+          </button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="newsGrid">
+          <article class="bg-white rounded-3xl overflow-hidden card-shadow card-shadow-hover border border-slate-100 transition-all group" data-reveal data-delay="100">
+            <div class="overflow-hidden h-52">
+              <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAy4p_NrlX9pZ26kaz5KQc7zWwjC0gkw-42iJK5MFFXsE6-y3JQFoLuQsX0UyF8XOIAGyto4k2wiTijHlcNnMWOII2xwrl57n6tG7-znY_uQB_cLrnUtQ-soRbw3xFI8tB8GuhR0EmZeZq1Q-mMpTfMtH6ea5fZopwU-JsvXKdygDpEYRihuNJhGUYW7M3P22PmiMTFFwAC2TSnrwzWLerRTyeQXw0MWnY1UPd7NaZRM6NbnMGgA7Eb-vAKx9c8-VY9jfLAOUJGh5kA" alt="Sinulog 2024" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"/>
+            </div>
+            <div class="p-7">
+              <span class="text-emerald-600 text-xs font-bold uppercase tracking-widest mb-2 block" data-en="Events" data-ceb="Mga Okasyon">Events</span>
+              <h3 style="font-size:1.1rem; font-weight:700; line-height:1.35;" class="text-slate-900 mb-3 group-hover:text-blue-700 transition-colors" data-en="Sinulog 2026 Preparations" data-ceb="Mga Paghanda sa Sinulog 2026">Sinulog 2026 Preparations</h3>
+              <p class="text-slate-500 text-sm leading-relaxed line-clamp-3 mb-6" data-en="City officials announce traffic rerouting and security measures for the upcoming festival season. Get the full schedule here." data-ceb="Ang mga opisyal sa siyudad nag-anunsyo sa pagbabago sa trapiko ug mga security measures para sa dapit nga festival season.">City officials announce traffic rerouting and security measures for the upcoming festival season. Get the full schedule here.</p>
+              <div class="flex items-center justify-between pt-5 border-t border-slate-100">
+                <span class="text-xs text-slate-400 font-semibold">Jan 12, 2026</span>
+                <div class="share-btn">
+                  <span class="tooltip" data-en="Share article" data-ceb="I-share ang artikulo">Share article</span>
+                  <button onclick="openShare('Sinulog 2026 Preparations')" class="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined text-slate-400 text-lg">share</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+          <article class="bg-white rounded-3xl overflow-hidden card-shadow card-shadow-hover border border-slate-100 transition-all group" data-reveal data-delay="200">
+            <div class="overflow-hidden h-52">
+              <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAIIhSalYydsTDnP8T1Td1N3YwqCSpuIICMnEns8F951CpS3WVGndDynWCQAYb2zSu_61kb6H5CYpK55XgXxa48wYtraJngE2x354BY2E7AXybytQ7hqVEVszeCWlUlXkT93CG8P8edZeIPQF8AOk_WR3gBpRL-1vIdEawAmGJCktvhvD-HPUKjwBImGsv9-fDbhWpmnd5rXKvgMy32y0nQ0A1NY-3RF_1UsgkoDZo_eYARqnvma1qLkVWQRiSfj4sv9VQJmhGQAii" alt="Health Center" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"/>
+            </div>
+            <div class="p-7">
+              <span class="text-orange-500 text-xs font-bold uppercase tracking-widest mb-2 block" data-en="Infrastructure" data-ceb="Imprastraktura">Infrastructure</span>
+              <h3 style="font-size:1.1rem; font-weight:700; line-height:1.35;" class="text-slate-900 mb-3 group-hover:text-blue-700 transition-colors" data-en="New Health Center Opening" data-ceb="Pagbukas sa Bag-ong Health Center">New Health Center Opening</h3>
+              <p class="text-slate-500 text-sm leading-relaxed line-clamp-3 mb-6" data-en="A state-of-the-art community health hub opens in Brgy. Guadalupe this Friday to serve over 5,000 residents." data-ceb="Usa ka moderno nga community health hub ang magbukas sa Brgy. Guadalupe karong Biyernes aron mag-alagad sa labaw pa sa 5,000 ka residente.">A state-of-the-art community health hub opens in Brgy. Guadalupe this Friday to serve over 5,000 residents.</p>
+              <div class="flex items-center justify-between pt-5 border-t border-slate-100">
+                <span class="text-xs text-slate-400 font-semibold">Jan 10, 2026</span>
+                <div class="share-btn">
+                  <span class="tooltip">Share article</span>
+                  <button onclick="openShare('New Health Center Opening')" class="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined text-slate-400 text-lg">share</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+          <article class="bg-white rounded-3xl overflow-hidden card-shadow card-shadow-hover border border-slate-100 transition-all group" data-reveal data-delay="300">
+            <div class="overflow-hidden h-52">
+              <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmITwfiLzPTd4OG337f-rJOK9kLdqHkh8DSo0anno3ML7GWnMytH54tEMGYZ8mBR99RmYgLgRfp_Q3VSvtXExVm1nuvs3YVtvlS9WK9GV-jjD1irR1TeHqftMtpgbPjSoRZXBMLS8oQnfFhd23J8UdrASJoRaD7MTybJ3gOleFlx1EbILIoDBeSmD5aSOVXoGilcjlR3S2XrC3zQENA17Y1S09acO2PUSyi6K2rEDqk5sgNaiUIFFUPfv5C0c4f1ieFMWQhnIvEvUY" alt="Recycling Drive" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"/>
+            </div>
+            <div class="p-7">
+              <span class="text-blue-600 text-xs font-bold uppercase tracking-widest mb-2 block" data-en="Community" data-ceb="Komunidad">Community</span>
+              <h3 style="font-size:1.1rem; font-weight:700; line-height:1.35;" class="text-slate-900 mb-3 group-hover:text-blue-700 transition-colors" data-en="Barangay Clean-up Drive" data-ceb="Barangay Clean-up Drive">Barangay Clean-up Drive</h3>
+              <p class="text-slate-500 text-sm leading-relaxed line-clamp-3 mb-6" data-en="Join neighbors this Saturday for a city-wide recycling initiative. Free tree seedlings for all participants!" data-ceb="Apil sa mga silingan karong Sabado alang sa usa ka recycling initiative sa tibuok siyudad. Libre nga mga punla sa kahoy alang sa tanan nga molahok!">Join neighbors this Saturday for a city-wide recycling initiative. Free tree seedlings for all participants!</p>
+              <div class="flex items-center justify-between pt-5 border-t border-slate-100">
+                <span class="text-xs text-slate-400 font-semibold">Jan 08, 2026</span>
+                <div class="share-btn">
+                  <span class="tooltip">Share article</span>
+                  <button onclick="openShare('Barangay Clean-up Drive')" class="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined text-slate-400 text-lg">share</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="bg-white rounded-3xl overflow-hidden card-shadow card-shadow-hover border border-slate-100 transition-all group news-extra" data-reveal data-delay="100">
+            <div class="overflow-hidden h-52 bg-gradient-to-br from-violet-100 to-blue-100 flex items-center justify-center">
+              <span class="material-symbols-outlined text-violet-400" style="font-size:56px;">school</span>
+            </div>
+            <div class="p-7">
+              <span class="text-violet-600 text-xs font-bold uppercase tracking-widest mb-2 block" data-en="Education" data-ceb="Edukasyon">Education</span>
+              <h3 style="font-size:1.1rem; font-weight:700; line-height:1.35;" class="text-slate-900 mb-3 group-hover:text-blue-700 transition-colors" data-en="Free Digital Literacy Program" data-ceb="Libre nga Digital Literacy Program">Free Digital Literacy Program</h3>
+              <p class="text-slate-500 text-sm leading-relaxed line-clamp-3 mb-6" data-en="The city launches free tech training sessions for senior citizens every Tuesday at Barangay halls across Cebu." data-ceb="Naglunsad ang siyudad og libre nga tech training sessions para sa mga matatanda matag Martes sa mga Barangay hall sa tibuok Cebu.">The city launches free tech training sessions for senior citizens every Tuesday at Barangay halls across Cebu.</p>
+              <div class="flex items-center justify-between pt-5 border-t border-slate-100">
+                <span class="text-xs text-slate-400 font-semibold">Jan 06, 2026</span>
+                <div class="share-btn">
+                  <span class="tooltip">Share article</span>
+                  <button onclick="openShare('Free Digital Literacy Program')" class="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined text-slate-400 text-lg">share</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+          <article class="bg-white rounded-3xl overflow-hidden card-shadow card-shadow-hover border border-slate-100 transition-all group news-extra" data-reveal data-delay="200">
+            <div class="overflow-hidden h-52 bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
+              <span class="material-symbols-outlined text-emerald-400" style="font-size:56px;">water_drop</span>
+            </div>
+            <div class="p-7">
+              <span class="text-emerald-600 text-xs font-bold uppercase tracking-widest mb-2 block" data-en="Environment" data-ceb="Kalikupan">Environment</span>
+              <h3 style="font-size:1.1rem; font-weight:700; line-height:1.35;" class="text-slate-900 mb-3 group-hover:text-blue-700 transition-colors" data-en="Watershed Restoration Project" data-ceb="Proyekto sa Pagpanumbalik sa Watershed">Watershed Restoration Project</h3>
+              <p class="text-slate-500 text-sm leading-relaxed line-clamp-3 mb-6" data-en="City engineers begin Phase 2 of the Guadalupe River restoration, with 3km of riverbank to be cleaned and reinforced." data-ceb="Ang mga inhinyero sa siyudad nagsugod sa Phase 2 sa pagpanumbalik sa Guadalupe River, nga adunay 3km nga riverbank nga limpyohon ug pahusayon.">City engineers begin Phase 2 of the Guadalupe River restoration, with 3km of riverbank to be cleaned and reinforced.</p>
+              <div class="flex items-center justify-between pt-5 border-t border-slate-100">
+                <span class="text-xs text-slate-400 font-semibold">Jan 04, 2026</span>
+                <div class="share-btn">
+                  <span class="tooltip">Share article</span>
+                  <button onclick="openShare('Watershed Restoration Project')" class="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined text-slate-400 text-lg">share</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+          <article class="bg-white rounded-3xl overflow-hidden card-shadow card-shadow-hover border border-slate-100 transition-all group news-extra" data-reveal data-delay="300">
+            <div class="overflow-hidden h-52 bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center">
+              <span class="material-symbols-outlined text-orange-400" style="font-size:56px;">directions_bus</span>
+            </div>
+            <div class="p-7">
+              <span class="text-orange-500 text-xs font-bold uppercase tracking-widest mb-2 block" data-en="Transportation" data-ceb="Transportasyon">Transportation</span>
+              <h3 style="font-size:1.1rem; font-weight:700; line-height:1.35;" class="text-slate-900 mb-3 group-hover:text-blue-700 transition-colors" data-en="E-Jeepney Pilot Route Expansion" data-ceb="Pagpadako sa E-Jeepney Pilot Route">E-Jeepney Pilot Route Expansion</h3>
+              <p class="text-slate-500 text-sm leading-relaxed line-clamp-3 mb-6" data-en="The modern e-jeepney program now covers 5 additional routes in northern Cebu, reducing commute time by an estimated 25%." data-ceb="Ang modernong e-jeepney program karon nakaabut na sa 5 dugang nga ruta sa amihanang Cebu, nagpagamay sa oras sa biyahe nga tinukmaan.">The modern e-jeepney program now covers 5 additional routes in northern Cebu, reducing commute time by an estimated 25%.</p>
+              <div class="flex items-center justify-between pt-5 border-t border-slate-100">
+                <span class="text-xs text-slate-400 font-semibold">Jan 02, 2026</span>
+                <div class="share-btn">
+                  <span class="tooltip">Share article</span>
+                  <button onclick="openShare('E-Jeepney Pilot Route Expansion')" class="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined text-slate-400 text-lg">share</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-24">
+      <div class="max-w-4xl mx-auto px-6" data-reveal>
+        <div class="bg-blue-700 rounded-[3rem] p-14 md:p-20 text-center text-white relative overflow-hidden shadow-2xl shadow-blue-700/30">
+          <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image:radial-gradient(#fff 1.5px,transparent 1.5px);background-size:30px 30px;"></div>
+          <div class="relative z-10">
+            <h2 style="font-size:clamp(1.75rem,4vw,2.5rem); font-weight:800; letter-spacing:-0.02em; line-height:1.2;" class="mb-5" data-en="Ready to join your community?" data-ceb="Andam na bang moapil sa inyong komunidad?">
+              Ready to join your community?
+            </h2>
+            <p class="text-blue-100 text-lg mb-10 max-w-xl mx-auto leading-relaxed" data-en="Create your account today and access barangay documents, emergency alerts, and faster issue reporting." data-ceb="Paghimo og account karon ug i-access ang mga dokumento sa barangay, emergency alerts, ug mas paspas nga pag-report sa mga isyu.">
+              Create your account today and access barangay documents, emergency alerts, and faster issue reporting.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+              <button onclick="openModal('signupModal')" class="bg-white text-blue-700 px-10 py-4 rounded-2xl font-bold text-base hover:bg-blue-50 hover:-translate-y-0.5 transition-all shadow-lg" data-en="Create Account" data-ceb="Paghimo og Account">
+                Create Account
+              </button>
+              <button onclick="handleDownload()" class="bg-blue-800/60 text-white border border-white/20 px-10 py-4 rounded-2xl font-bold text-base hover:bg-blue-600 hover:-translate-y-0.5 transition-all" data-en="Download App" data-ceb="I-download ang App">
+                Download App
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="bg-slate-900 border-t border-slate-800 py-20">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-12 mb-16">
+        <div class="md:col-span-5" data-reveal>
+          <div class="flex items-center gap-3 mb-6">
+            <div style="width:36px;height:36px;background:#1d4ed8;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+              <span class="material-symbols-outlined text-white" style="font-size:20px;">location_city</span>
+            </div>
+            <span style="font-size:1.15rem; font-weight:800; letter-spacing:-0.02em;" class="text-white">BayanihanHub</span>
+          </div>
+          <p class="text-slate-400 text-sm leading-relaxed max-w-sm mb-8" data-en="Empowering every Cebuano through transparent, accessible, and community-driven digital governance. Built for the people, by the people." data-ceb="Pagpalakas sa matag Cebuano pinaagi sa transparent, accessible, ug community-driven nga digital governance. Gihimo alang sa mga tawo, sa mga tawo.">
+            Empowering every Cebuano through transparent, accessible, and community-driven digital governance. Built for the people, by the people.
+          </p>
+          <div class="flex gap-3">
+            <a href="https://github.com" target="_blank" rel="noopener" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-all" aria-label="GitHub">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577v-2.165c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.84 1.237 1.84 1.237 1.07 1.834 2.807 1.304 3.492.997.108-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.91 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .322.218.694.825.576C20.565 21.796 24 17.298 24 12c0-6.63-5.37-12-12-12z"/></svg>
+            </a>
+            <a href="mailto:support@bayanihanhub.cebu" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-all" aria-label="Email">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-.205.043-.399.119-.574L12 13.09 23.881 4.883c.076.175.119.369.119.574zM12 11.09L.29 3.29A1.636 1.636 0 0 1 1.636 2.727h20.728c.525 0 .99.248 1.286.634L12 11.09z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="md:col-span-2" data-reveal data-delay="100">
+          <h4 class="text-white text-xs font-bold uppercase tracking-widest mb-6" data-en="Platform" data-ceb="Plataporma">Platform</h4>
+          <ul class="space-y-4">
+            <li><a href="#how-it-works" onclick="scrollToSection('how-it-works')" class="text-sm text-slate-400 hover:text-blue-400 transition-colors" data-en="Service Reports" data-ceb="Mga Service Report">Service Reports</a></li>
+            <li><a href="#updates" onclick="scrollToSection('updates')" class="text-sm text-slate-400 hover:text-blue-400 transition-colors" data-en="Public Projects" data-ceb="Mga Pampublikong Proyekto">Public Projects</a></li>
+            <li><a href="mailto:support@bayanihanhub.cebu" class="text-sm text-slate-400 hover:text-blue-400 transition-colors" data-en="Help & Support" data-ceb="Tabang ug Suporta">Help & Support</a></li>
+          </ul>
+        </div>
+        <div class="md:col-span-2" data-reveal data-delay="200">
+          <h4 class="text-white text-xs font-bold uppercase tracking-widest mb-6" data-en="Legal" data-ceb="Legal">Legal</h4>
+          <ul class="space-y-4">
+            <li><a href="#" onclick="showToast('Terms of Service coming soon.','info');return false;" class="text-sm text-slate-400 hover:text-blue-400 transition-colors" data-en="Terms of Service" data-ceb="Mga Termino sa Serbisyo">Terms of Service</a></li>
+            <li><a href="#" onclick="showToast('Privacy Policy coming soon.','info');return false;" class="text-sm text-slate-400 hover:text-blue-400 transition-colors" data-en="Privacy Policy" data-ceb="Patakaran sa Privacy">Privacy Policy</a></li>
+            <li><a href="#" onclick="showToast('Transparency Seal coming soon.','info');return false;" class="text-sm text-slate-400 hover:text-blue-400 transition-colors" data-en="Transparency Seal" data-ceb="Transparency Seal">Transparency Seal</a></li>
+          </ul>
+        </div>
+        <div class="md:col-span-3" data-reveal data-delay="300">
+          <h4 class="text-white text-xs font-bold uppercase tracking-widest mb-6" data-en="Contact" data-ceb="Kontak">Contact</h4>
+          <div class="space-y-4">
+            <p class="text-sm text-slate-400 flex items-start gap-2.5 leading-relaxed">
+              <span class="material-symbols-outlined text-slate-500 text-lg mt-0.5 shrink-0">location_on</span>
+              Cebu City Hall, No. 1 SRP Coastal Rd., Cebu City, 6000 Philippines
+            </p>
+            <a href="mailto:support@bayanihanhub.cebu" class="text-sm text-blue-400 font-semibold flex items-center gap-2 hover:underline">
+              <span class="material-symbols-outlined text-lg">mail</span>
+              support@bayanihanhub.cebu
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="pt-8 border-t border-slate-800 flex justify-center">
+        <p class="text-xs text-slate-500">© 2026 BayanihanHub. Proudly serving the people of Cebu.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
+  <script>
+    /**
+     * ─── BAYANIHANHUB CORE SCRIPT 2026 V1.0 ──────────────────────────
+     * Features: Multi-lang, OTP Auth, Confetti, Loading System, Eye Toggle
+     */
+
+    // ─── 1. INITIALIZATION & OBSERVERS ────────────────────────
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('[data-reveal]').forEach(el => observer.observe(el));
+
+    // EMERGENCY FAILSAFE: Kung hindi gumana ang observer, piliting ilitaw ang design after 1 second
+    setTimeout(() => {
+        document.querySelectorAll('[data-reveal]').forEach(el => {
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+        });
+    }, 1000);
+
+    // ─── 2. UI ENHANCEMENTS (EYE, CONFETTI, LOADER) ───────────
+
+    function togglePass(id, btn) {
+        const input = document.getElementById(id);
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.textContent = 'visibility_off';
+        } else {
+            input.type = 'password';
+            btn.textContent = 'visibility';
+        }
+    }
+
+    function startLoading() {
+        const loader = document.getElementById('loadingOverlay');
+        if (loader) loader.style.display = 'flex';
+    }
+
+    function celebrate() {
+        if (typeof confetti === 'function') {
+            confetti({
+                particleCount: 150, spread: 70, origin: { y: 0.6 },
+                colors: ['#004ac6', '#2563eb', '#4ade80']
+            });
+        }
+    }
+
+    // ─── 3. AUTHENTICATION LOGIC (BACKEND CONNECTED) ──────────
+
+    async function handleLogin(e) {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+
+        showToast('Verifying identity...', 'info');
+
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                closeModal('loginModal');
+                startLoading(); 
+                setTimeout(() => {
+                    window.location.href = data.redirect_url; 
+                }, 2000); 
+            } else {
+                showToast(data.error || 'Mali ang email o password.', 'error');
+            }
+        } catch (error) { showToast('Server error. Is Python running?', 'error'); }
+    }
+
+    async function triggerOTP() {
+        const name = document.getElementById('regName').value;
+        const email = document.getElementById('regEmail').value;
+        const password = document.getElementById('regPass').value;
+        const phone = document.getElementById('phoneNumber').value;
+
+        if(!name || !email || !password || !phone) {
+            showToast('Please fill in all fields.', 'error');
+            return;
+        }
+
+        showToast('Sending verification code...', 'info');
+        
+        try {
+            const response = await fetch('/api/send-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password, phone })
+            });
+
+            if (response.ok) {
+                document.getElementById('signupStep1').classList.add('hidden');
+                document.getElementById('signupStep2').classList.remove('hidden');
+                showToast('OTP Sent! Check your email.', 'success');
+            } else {
+                const errorData = await response.json();
+                showToast(errorData.error || 'Failed to send OTP.', 'error');
+            }
+        } catch (err) { showToast('Connection error.', 'error'); }
+    }
+
+    async function handleSignupSubmit(e) {
+        e.preventDefault();
+        const phone = document.getElementById('phoneNumber').value;
+        const code = document.getElementById('otpCodeInput').value;
+
+        try {
+            const response = await fetch('/api/verify-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone, code })
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                celebrate(); 
+                showToast('Account Created Successfully! 🎉', 'success');
+                
+                setTimeout(() => {
+                    startLoading(); 
+                    setTimeout(() => { window.location.href = data.redirect_url; }, 2000);
+                }, 1500); 
+            } else {
+                showToast(data.error || 'Invalid OTP code.', 'error');
+            }
+        } catch (e) { showToast('Verification failed.', 'error'); }
+    }
+
+    // ─── 4. GENERAL UTILITIES (MODALS, LANG, TOAST) ───────────
+
+    let currentLang = 'en';
+    function setLang(lang) {
+        currentLang = lang;
+        document.querySelectorAll('[data-en]').forEach(el => {
+            el.innerHTML = el.getAttribute('data-' + lang) || el.getAttribute('data-en');
+        });
+        document.getElementById('btnEng').className = lang === 'en' ? 'px-4 py-1.5 rounded-full text-xs font-bold bg-white text-blue-700 shadow-sm' : 'px-4 py-1.5 rounded-full text-xs font-bold text-slate-500';
+        document.getElementById('btnCeb').className = lang === 'ceb' ? 'px-4 py-1.5 rounded-full text-xs font-bold bg-white text-blue-700 shadow-sm' : 'px-4 py-1.5 rounded-full text-xs font-bold text-slate-500';
+        showToast(lang === 'en' ? 'Switched to English' : 'Gibag-o sa Cebuano', 'success');
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('active'); document.body.style.overflow = 'hidden'; }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); document.body.style.overflow = ''; }
+    function switchModal(closeId, openId) { closeModal(closeId); setTimeout(() => openModal(openId), 300); }
+
+    let toastTimer;
+    function showToast(msg, type = 'success') {
+        const toast = document.getElementById('toast');
+        const icon = document.getElementById('toastIcon');
+        const msgEl = document.getElementById('toastMsg');
+        const icons = { success: 'check_circle', error: 'error', info: 'info' };
+        const colors = { success: '#4ade80', error: '#f87171', info: '#60a5fa' };
+
+        icon.textContent = icons[type] || 'info';
+        icon.style.color = colors[type] || '#60a5fa';
+        msgEl.textContent = msg;
+        
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 4000);
+    }
+
+    function goBackToStep1() {
+        document.getElementById('signupStep2').classList.add('hidden');
+        document.getElementById('signupStep1').classList.remove('hidden');
+    }
+
+    function scrollToSection(id) {
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function openShare(title) {
+        document.getElementById('shareArticleTitle').textContent = title;
+        openModal('shareModal');
+    }
+
+    // ─── FORGOT PASSWORD LOGIC ───
+    async function sendResetOTP() {
+        const email = document.getElementById('resetEmail').value;
+        if (!email) { showToast('Please enter your email.', 'error'); return; }
+
+        showToast('Searching for account...', 'info');
+        try {
+            const response = await fetch('/api/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            
+            if (response.ok) {
+                document.getElementById('forgotStep1').classList.add('hidden');
+                document.getElementById('forgotStep2').classList.remove('hidden');
+                showToast('Reset code sent! Check email/terminal.', 'success');
+            } else {
+                const data = await response.json();
+                showToast(data.error, 'error');
+            }
+        } catch (e) { showToast('Connection error.', 'error'); }
+    }
+
+    async function submitNewPassword() {
+        const email = document.getElementById('resetEmail').value;
+        const code = document.getElementById('resetOTP').value;
+        const new_password = document.getElementById('newPassword').value;
+
+        if (!code || !new_password) { showToast('Please fill all fields.', 'error'); return; }
+
+        showToast('Updating password...', 'info');
+        try {
+            const response = await fetch('/api/reset-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, code, new_password })
+            });
+
+            if (response.ok) {
+                celebrate(); // Sabog confetti uli!
+                showToast('Password updated! You can now login.', 'success');
+                
+                // Balik sa login screen after 2 seconds
+                setTimeout(() => {
+                    document.getElementById('forgotStep2').classList.add('hidden');
+                    document.getElementById('forgotStep1').classList.remove('hidden');
+                    switchModal('forgotModal', 'loginModal');
+                }, 2000);
+            } else {
+                const data = await response.json();
+                showToast(data.error, 'error');
+            }
+        } catch (e) { showToast('Update failed.', 'error'); }
+    }
+
+    // ─── COMING SOON BUTTON ───
+    function handleDownload() {
+        showToast('Mobile App is coming soon to iOS & Android! 📱', 'info');
+    }
+
+  </script>
+
+</body>
+</html>
