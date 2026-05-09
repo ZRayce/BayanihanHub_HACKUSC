@@ -18,7 +18,8 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
-            return redirect('/')
+            # Mas safe na gamitin ang url_for('home') kesa sa hardcoded '/'
+            return redirect(url_for('home'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -118,3 +119,4 @@ def redeem_item():
             return jsonify({"error": "Not enough Hero Points!"}), 400
     except Exception as e:
         return jsonify({"error": "Failed to process redemption."}), 500
+        
