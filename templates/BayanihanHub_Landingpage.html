@@ -669,13 +669,6 @@
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
 
-           // HACKATHON MAGIC: Admin Shortcut
-            if(email === 'admin.bayanihanhub@cebu.gov.ph' && password === 'Bayanihan_Secure_2026!') {
-                showToast('Welcome Admin!', 'success');
-                closeModal('loginModal'); startLoading();
-                setTimeout(() => { window.location.href = '/Admin_Dashboard'; }, 1500); return; // 👈 Pinalitan ng /Admin_Dashboard
-            }
-
             showToast('Verifying identity...', 'info');
 
             try {
@@ -690,11 +683,7 @@
                     setTimeout(() => { window.location.href = data.redirect_url; }, 1500); 
                 } else { showToast(data.error || 'Invalid email or password.', 'error'); }
             } catch (error) { 
-                if(email.includes('@')) {
-                    showToast('Backend offline. Using Demo Mode.', 'info');
-                    closeModal('loginModal'); startLoading();
-                    setTimeout(() => { window.location.href = '/user-dashboard'; }, 1500);
-                } else { showToast('Server error. Is Python running?', 'error'); }
+                showToast('Server error. Please try again.', 'error'); 
             }
         }
 
