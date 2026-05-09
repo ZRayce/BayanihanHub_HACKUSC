@@ -22,8 +22,9 @@ app.config.update(
     SESSION_COOKIE_SAMESITE='Lax',
 )
 
-GMAIL_USER = os.environ.get('MAIL_USERNAME', 'noreply.bayanihanhub@gmail.com') 
-GMAIL_PASS = os.environ.get('MAIL_PASSWORD', 'fjomyntwwscanlhf') # Siguraduhing walang spaces sa Render!
+# 🔥 HARDCODED CREDENTIALS PARA 100% WALANG SABLAY SA DEMO
+GMAIL_USER = 'noreply.bayanihanhub@gmail.com' 
+GMAIL_PASS = 'fjomyntwwscanlhf'
 
 # --- DATABASE SETUP ---
 def get_db_connection():
@@ -103,7 +104,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# --- PRODUCTION EMAIL SENDER ---
+# --- PRODUCTION EMAIL SENDER (100% FIX: PORT 587 TLS) ---
 def send_email_otp(receiver_email, otp, subject='Verification Code'):
     try:
         msg = MIMEMultipart('alternative')
@@ -128,10 +129,15 @@ def send_email_otp(receiver_email, otp, subject='Verification Code'):
         """
         msg.attach(MIMEText(html, 'html'))
         
-        # SSL Port 465 is more reliable on Render
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-            server.login(GMAIL_USER, GMAIL_PASS)
-            server.sendmail(GMAIL_USER, receiver_email, msg.as_string())
+        # 🔥 SSL Port 587 & STARTTLS para iwas block kay Gmail
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.ehlo()
+        server.starttls()
+        server.login(GMAIL_USER, GMAIL_PASS)
+        server.sendmail(GMAIL_USER, receiver_email, msg.as_string())
+        server.quit()
+        
+        print(f"✅ EMAIL SENT SUCCESSFULLY TO {receiver_email}")
         return True
     except Exception as e:
         print(f"❌ SMTP Error Detail: {e}")
@@ -172,7 +178,6 @@ def send_otp():
                 else:
                     print(f"⚠️ EMAIL FAILED. Use backup code: {code}")
 
-        # ✅ FIX APPLIED HERE: Binago ko ang app._get_current_object() sa app
         threading.Thread(target=run_email_in_thread, args=(app, email, otp_code)).start()
 
         return jsonify({"message": "OTP generated! Check your email."}), 200
@@ -263,7 +268,6 @@ def forgot_password():
             with app_instance.app_context():
                 send_email_otp(target_email, code, "Reset Password Code")
 
-        # ✅ FIX APPLIED HERE: Binago ko ang app._get_current_object() sa app
         threading.Thread(target=run_email_in_thread, args=(app, email, otp_code)).start() 
 
         return jsonify({"message": "Reset code sent!"}), 200
@@ -338,3 +342,4 @@ def page_not_found(e):
 
 if __name__ == '__main__':
     app.run(debug=True)
+    
