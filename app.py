@@ -133,7 +133,7 @@ def send_email_otp(receiver_email, otp):
 
 @app.route('/')
 def home():
-    return render_template('BayanihanHub_LandingPAGE.html')
+    return render_template('BayanihanHub_Landingpage.html')
 
 @app.route('/api/send-otp', methods=['POST'])
 def send_otp():
@@ -223,7 +223,7 @@ def login():
     if user and check_password_hash(user['password_hash'], password):
         session['user_id'] = user['user_id']
         session['role'] = user['role']
-        url = '/admin-dashboard' if user['role'] == 'official' else '/user-dashboard'
+        url = '/Admin_Dashboard' if user['role'] == 'official' else '/User_Dashboard'
         return jsonify({"message": "Login Success", "redirect_url": url}), 200
     
     return jsonify({"error": "Incorrect email or password."}), 401
@@ -238,7 +238,7 @@ def logout():
     session.clear()
     return redirect(url_for('home'))
 
-@app.route('/admin-dashboard')
+@app.route('/Admin_Dashboard')
 @login_required
 def admin_dashboard():
     if session.get('role') != 'official':
