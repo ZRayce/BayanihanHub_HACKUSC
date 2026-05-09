@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | BayanihanHub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Manrope', sans-serif; background-color: #f4f5f8; color: #0f172a; }
+        .material-symbols-outlined { font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background-color: #d8b4fe; border-radius: 10px; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.4s ease-out forwards; }
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255, 255, 255, 0.5); }
+        .tab-active { background-color: #ede9fe; color: #6d28d9; border-color: #ddd6fe; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        .tab-inactive { color: #64748b; border-color: transparent; }
+        .tab-inactive:hover { background-color: #f8fafc; color: #6d28d9; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 hidden transition-opacity md:hidden"></div>
+
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="fixed md:relative inset-y-0 left-0 w-72 bg-white/95 backdrop-blur-xl border-r border-slate-200/60 flex flex-col z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 shadow-[4px_0_24px_rgba(0,0,0,0.04)] shrink-0">
+        <div>
+            <div class="h-24 flex items-center justify-between px-8 border-b border-slate-100">
+                <div class="flex items-center">
+                    <img src="{{ url_for('static', filename='Images/BAYANIHANHUB_LOGO.png') }}" alt="Logo" class="w-11 h-11 object-contain mr-3" onerror="this.src='https://via.placeholder.com/44?text=BH'">
+                    <div>
+                        <span class="font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-violet-700 to-indigo-600 block leading-none">BayaniHub</span>
+                        <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest" data-en="Command Center" data-ceb="Sentrong Manduan">Command Center</span>
+                    </div>
+                </div>
+                <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-rose-500 p-2 -mr-2"><span class="material-symbols-outlined">close</span></button>
+            </div>
+
+            <nav class="p-5 space-y-2 mt-2 overflow-y-auto">
+                <p class="px-4 text-[10px] md:text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.2em] mb-3" data-en="Operations" data-ceb="Operasyon">Operations</p>
+                <button onclick="switchTab('live')" id="tab-live" class="w-full flex items-center gap-3.5 px-4 py-4 rounded-2xl font-bold text-sm border transition-all tab-active group active:scale-95">
+                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform">satellite_alt</span> <span data-en="Live Incidents" data-ceb="Mga Aktibong Insidente">Live Incidents</span>
+                </button>
+                <button onclick="switchTab('transparency')" id="tab-transparency" class="w-full flex items-center gap-3.5 px-4 py-4 rounded-2xl font-bold text-sm border transition-all tab-inactive group active:scale-95">
+                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform">verified_user</span> <span data-en="Transparency Record" data-ceb="Rekord sa Transparensya">Transparency Record</span>
+                </button>
+                <button onclick="switchTab('inventory')" id="tab-inventory" class="w-full flex items-center gap-3.5 px-4 py-4 rounded-2xl font-bold text-sm border transition-all tab-inactive group active:scale-95">
+                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform">inventory_2</span> <span data-en="Store Inventory" data-ceb="Imbentaryo sa Tindahan">Store Inventory</span>
+                </button>
+                
+                <p class="px-4 text-[10px] md:text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.2em] mb-3 mt-6" data-en="System" data-ceb="Sistema">System</p>
+                <button onclick="openSettings()" class="w-full flex items-center gap-3.5 px-4 py-4 rounded-2xl font-bold text-sm border transition-all tab-inactive group active:scale-95">
+                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform">settings</span> <span data-en="Account Settings" data-ceb="Mga Setting">Account Settings</span>
+                </button>
+                <button onclick="openBugReport()" class="w-full flex items-center gap-3.5 px-4 py-4 rounded-2xl font-bold text-sm border border-rose-50/50 hover:bg-rose-50 hover:border-rose-100 transition-all text-slate-600 group active:scale-95">
+                    <span class="material-symbols-outlined text-rose-500 group-hover:scale-110 transition-transform">bug_report</span> 
+                    <span class="group-hover:text-rose-700 transition-colors" data-en="Report System Bug" data-ceb="I-report ang Bug">Report System Bug</span>
+                </button>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative bg-[#f4f5f8]">
+        <header class="h-20 md:h-24 glass-panel flex items-center justify-between px-4 md:px-8 z-10 sticky top-0 shrink-0">
+            <div class="flex items-center gap-4">
+                <button onclick="toggleSidebar()" class="md:hidden p-2.5 text-slate-500 hover:text-violet-700 bg-white rounded-xl shadow-sm border border-slate-200 active:scale-95 transition-transform">
+                    <span class="material-symbols-outlined">menu</span>
+                </button>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-black text-slate-800 tracking-tight" id="headerTitle" data-en="Live Incidents" data-ceb="Mga Aktibong Insidente">Live Incidents</h1>
+                    <p class="text-[10px] md:text-xs font-bold text-violet-500" id="currentDateTime">Loading time...</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3 md:gap-5">
+                <button onclick="toggleLang()" id="langBtn" class="flex items-center gap-1 bg-white border border-slate-200 text-slate-600 px-3 py-1.5 md:px-4 md:py-2 rounded-xl font-extrabold text-xs hover:border-violet-300 hover:text-violet-700 transition-all shadow-sm active:scale-95">
+                    <span class="material-symbols-outlined text-[16px] md:text-[18px]">translate</span> EN
+                </button>
+
+                <div class="relative">
+                    <button onclick="toggleProfileMenu()" class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-500 text-white shadow-md shadow-violet-500/30 flex items-center justify-center font-black text-lg md:text-xl border-[3px] border-white focus:outline-none hover:scale-105 transition-transform">
+                        {{ user['full_name'][0] | upper }}
+                    </button>
+                    <div id="profileMenu" class="hidden absolute right-0 mt-3 w-56 bg-white border border-slate-100 rounded-2xl shadow-xl py-2 z-50 animate-fade">
+                        <div class="px-5 py-3 border-b border-slate-50 mb-1">
+                            <p class="text-sm font-black text-slate-800 line-clamp-1">{{ user['full_name'] }}</p>
+                            <p class="text-[10px] text-violet-500 font-extrabold uppercase tracking-widest line-clamp-1">{{ user['email'] }}</p>
+                        </div>
+                        <a href="/api/logout" class="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-rose-600 hover:bg-rose-50 transition-colors" data-en="Logout" data-ceb="Gawas">
+                            <span class="material-symbols-outlined text-[18px]">logout</span> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 w-full max-w-7xl mx-auto pb-24" id="mainScroll">
+            
+            <!-- ─── TAB 1: LIVE INCIDENTS (MAP + LEADERBOARD) ─── -->
+            <div id="view-live" class="block animate-fade">
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-5 mb-6 md:mb-8">
+                    <div class="bg-white p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-center border-l-[6px] border-l-slate-300">
+                        <div class="flex justify-between items-center mb-2"><p class="text-[9px] md:text-[11px] font-black text-slate-400 uppercase tracking-widest" data-en="Total Tickets" data-ceb="Tanan Tiket">Total Tickets</p><span class="material-symbols-outlined text-slate-300 text-lg md:text-2xl">folder_copy</span></div>
+                        <p class="text-2xl md:text-4xl font-black text-slate-800" id="stat-total">0</p>
+                    </div>
+                    <div class="bg-white p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-center border-l-[6px] border-l-rose-500 relative overflow-hidden">
+                        <div class="flex justify-between items-center mb-2"><p class="text-[9px] md:text-[11px] font-black text-rose-500 uppercase tracking-widest" data-en="Pending" data-ceb="Naghulat">Pending</p><span class="material-symbols-outlined text-rose-300 text-lg md:text-2xl animate-pulse">warning</span></div>
+                        <p class="text-2xl md:text-4xl font-black text-slate-800" id="stat-pending">0</p>
+                    </div>
+                    <div class="col-span-2 md:col-span-1 bg-white p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col justify-center border-l-[6px] border-l-amber-500 relative overflow-hidden">
+                        <div class="flex justify-between items-center mb-2"><p class="text-[9px] md:text-[11px] font-black text-amber-500 uppercase tracking-widest" data-en="In Progress" data-ceb="Gi-aksyunan">In Progress</p><span class="material-symbols-outlined text-amber-300 text-lg md:text-2xl">engineering</span></div>
+                        <p class="text-2xl md:text-4xl font-black text-slate-800" id="stat-inprogress">0</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 mb-8">
+                    <div class="lg:col-span-2 flex flex-col h-[400px] md:h-[500px]">
+                        <h3 class="text-lg md:text-xl font-black text-slate-800 mb-3 md:mb-4 tracking-tight flex items-center gap-2">
+                            <span class="material-symbols-outlined text-violet-600">satellite_alt</span> <span data-en="Live Dispatch Map" data-ceb="Aktibong Mapa sa Tiket">Live Dispatch Map</span>
+                        </h3>
+                        <div class="bg-white rounded-[2rem] p-2 md:p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex-1 relative z-0 w-full"><div id="adminMap" class="w-full h-full rounded-[1.5rem] z-0"></div></div>
+                    </div>
+
+                    <!-- LEADERBOARD (UN-CRAMPED) -->
+                    <div class="lg:col-span-1 flex flex-col h-auto lg:h-[500px]">
+                        <h3 class="text-lg md:text-xl font-black text-slate-800 mb-3 md:mb-4 tracking-tight flex items-center gap-2">
+                            <span class="material-symbols-outlined text-amber-500">emoji_events</span> <span data-en="Top Citizens" data-ceb="Mga Top nga Lumulupyo">Top Citizens</span>
+                        </h3>
+                        <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex-1 flex flex-col gap-5 overflow-hidden relative">
+                            <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-amber-100 rounded-full blur-2xl opacity-50"></div>
+                            <div class="flex items-center gap-4 bg-gradient-to-r from-amber-50 to-yellow-50 p-5 rounded-2xl border border-amber-100/50 relative z-10">
+                                <div class="w-12 h-12 rounded-full bg-amber-400 text-white font-black flex items-center justify-center text-xl shadow-md border-2 border-white shrink-0">1</div>
+                                <div class="flex-1">
+                                    <h4 class="font-black text-slate-800 text-base">Maria Clara</h4>
+                                    <p class="text-[10px] text-amber-600 font-bold uppercase tracking-wider">Bayani ng Bayan</p>
+                                </div>
+                                <div class="text-right"><p class="font-black text-slate-800 text-lg">450</p><p class="text-[9px] text-slate-400 font-bold uppercase">Pts</p></div>
+                            </div>
+                            <div class="flex items-center gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-100 relative z-10">
+                                <div class="w-12 h-12 rounded-full bg-slate-300 text-slate-600 font-black flex items-center justify-center text-xl shadow-inner border-2 border-white shrink-0">2</div>
+                                <div class="flex-1">
+                                    <h4 class="font-black text-slate-800 text-base">Juan Dela Cruz</h4>
+                                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Barangay Defender</p>
+                                </div>
+                                <div class="text-right"><p class="font-black text-slate-800 text-lg">320</p><p class="text-[9px] text-slate-400 font-bold uppercase">Pts</p></div>
+                            </div>
+                            <div class="flex items-center gap-4 bg-orange-50/50 p-5 rounded-2xl border border-orange-100/50 relative z-10">
+                                <div class="w-12 h-12 rounded-full bg-orange-300 text-white font-black flex items-center justify-center text-xl shadow-inner border-2 border-white shrink-0">3</div>
+                                <div class="flex-1">
+                                    <h4 class="font-black text-slate-800 text-base">Pedro Penduko</h4>
+                                    <p class="text-[10px] text-orange-600 font-bold uppercase tracking-wider">Barangay Defender</p>
+                                </div>
+                                <div class="text-right"><p class="font-black text-slate-800 text-lg">180</p><p class="text-[9px] text-slate-400 font-bold uppercase">Pts</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TABLE/LIST -->
+                <div class="flex flex-col w-full">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 md:mb-4 gap-3">
+                        <h3 class="text-lg md:text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+                            <span class="material-symbols-outlined text-violet-600">confirmation_number</span> <span data-en="Active Tickets" data-ceb="Mga Aktibong Tiket">Active Tickets</span>
+                        </h3>
+                        <select id="urgencyFilter" onchange="fetchAdminReports()" class="w-full sm:w-auto bg-white border border-slate-200 text-slate-700 text-xs md:text-sm font-bold rounded-xl px-4 py-2.5 outline-none shadow-sm focus:ring-4 focus:ring-violet-500/10 transition-all cursor-pointer">
+                            <option value="All" data-en="All Active Tickets" data-ceb="Tanan Aktibong Tiket">All Active Tickets</option>
+                            <option value="Urgent" data-en="⚠️ Urgent Only" data-ceb="⚠️ Dinalian Lang">⚠️ Urgent Only</option>
+                            <option value="Normal" data-en="Normal Priority" data-ceb="Normal nga Prayoridad">Normal Priority</option>
+                        </select>
+                    </div>
+                    <div class="bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden p-2">
+                        <div class="overflow-x-auto w-full p-2">
+                            <table class="w-full text-left border-collapse min-w-[700px]">
+                                <tbody id="activeTicketsTable" class="divide-y divide-slate-100/80"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── TAB 2: TRANSPARENCY RECORD ─── -->
+            <div id="view-transparency" class="hidden animate-fade">
+                <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-[2.5rem] p-6 md:p-8 text-white shadow-xl shadow-emerald-500/20 mb-6 md:mb-8 flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-left">
+                    <div class="w-16 h-16 bg-white/20 rounded-[1.5rem] flex items-center justify-center backdrop-blur-md shrink-0"><span class="material-symbols-outlined text-4xl">verified</span></div>
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-black mb-1 md:mb-2 tracking-tight" data-en="Public Transparency Ledger" data-ceb="Pampublikong Rekord sa Transparensya">Public Transparency Ledger</h2>
+                        <p class="text-emerald-50 text-sm md:text-base font-medium max-w-2xl" data-en="Permanently recorded and officially resolved community issues." data-ceb="Permanente nga gilista dinhi ang mga nasulbad nga isyu.">Permanently recorded and officially resolved community issues.</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden">
+                    <div class="overflow-x-auto w-full p-2">
+                        <table class="w-full text-left border-collapse min-w-[550px]">
+                            <thead>
+                                <tr class="bg-slate-50/50 text-[10px] uppercase tracking-widest text-slate-400 font-black border-b border-slate-100">
+                                    <th class="p-4 rounded-tl-xl" data-en="Ticket Info" data-ceb="ID sa Tiket">Ticket Info</th>
+                                    <th class="p-4" data-en="Issue Details" data-ceb="Detalye sa Isyu">Issue Details</th>
+                                    <th class="p-4 rounded-tr-xl" data-en="Resolution Status" data-ceb="Estadu sa Pagsulbad">Resolution Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resolvedTicketsTable" class="divide-y divide-slate-100/80"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── TAB 3: STORE INVENTORY (ACCURATE WITH USER) ─── -->
+            <div id="view-inventory" class="hidden animate-fade">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 px-2">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-black text-slate-800 mb-1 flex items-center gap-2 tracking-tight"><span class="material-symbols-outlined text-orange-500 text-3xl">storefront</span> <span data-en="Store Inventory" data-ceb="Imbentaryo sa Tindahan">Store Inventory</span></h2>
+                        <p class="text-xs md:text-sm font-bold text-slate-500">Managing {{ user['full_name'] }}'s local store stocks.</p>
+                    </div>
+                    <button class="w-full md:w-auto bg-violet-600 text-white px-6 py-3 rounded-xl font-black flex items-center justify-center gap-2 shadow-lg shadow-violet-500/30 hover:scale-105 active:scale-95 transition-all">
+                        <span class="material-symbols-outlined">add_box</span> <span data-en="Add Product" data-ceb="Dugang">Add Product</span>
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                    <!-- Item 1 -->
+                    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col group hover:border-violet-300 transition-all">
+                        <div class="h-32 bg-slate-50 relative">
+                            <img src="https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
+                            <span class="absolute top-2 right-2 bg-emerald-500 text-white text-[8px] font-black px-2 py-0.5 rounded-lg">Stock: 50</span>
+                        </div>
+                        <div class="p-4 flex-1 flex flex-col">
+                            <h4 class="font-black text-slate-800 text-sm mb-1">1 Kilo Bigas</h4>
+                            <p class="text-violet-600 font-black text-xs">50 Pts</p>
+                            <div class="mt-4 flex gap-2">
+                                <button class="flex-1 py-1.5 bg-slate-50 text-slate-600 text-[10px] font-black rounded-lg hover:bg-slate-100 transition-all">EDIT</button>
+                                <button class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-all"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Item 2 (EMOJI) -->
+                    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col group hover:border-violet-300 transition-all">
+                        <div class="h-32 bg-slate-50 flex items-center justify-center text-5xl relative">
+                            <span>🥫</span>
+                            <span class="absolute top-2 right-2 bg-emerald-500 text-white text-[8px] font-black px-2 py-0.5 rounded-lg">Stock: 120</span>
+                        </div>
+                        <div class="p-4 flex-1 flex flex-col">
+                            <h4 class="font-black text-slate-800 text-sm mb-1">Canned Goods Pack</h4>
+                            <p class="text-violet-600 font-black text-xs">30 Pts</p>
+                            <div class="mt-4 flex gap-2">
+                                <button class="flex-1 py-1.5 bg-slate-50 text-slate-600 text-[10px] font-black rounded-lg hover:bg-slate-100 transition-all">EDIT</button>
+                                <button class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-all"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Item 3 -->
+                    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col group hover:border-violet-300 transition-all">
+                        <div class="h-32 bg-slate-50 relative">
+                            <img src="https://images.unsplash.com/photo-1587486913049-53fc88980cfc?auto=format&fit=crop&w=400&q=80" class="w-full h-full object-cover">
+                            <span class="absolute top-2 right-2 bg-rose-500 text-white text-[8px] font-black px-2 py-0.5 rounded-lg">Stock: 5</span>
+                        </div>
+                        <div class="p-4 flex-1 flex flex-col">
+                            <h4 class="font-black text-slate-800 text-sm mb-1">1 Dozen Eggs</h4>
+                            <p class="text-violet-600 font-black text-xs">45 Pts</p>
+                            <div class="mt-4 flex gap-2">
+                                <button class="flex-1 py-1.5 bg-slate-50 text-slate-600 text-[10px] font-black rounded-lg hover:bg-slate-100 transition-all">EDIT</button>
+                                <button class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-all"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Item 4 (EMOJI) -->
+                    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col group hover:border-violet-300 transition-all">
+                        <div class="h-32 bg-slate-50 flex items-center justify-center text-5xl relative">
+                            <span>📱</span>
+                            <span class="absolute top-2 right-2 bg-emerald-500 text-white text-[8px] font-black px-2 py-0.5 rounded-lg">Digital</span>
+                        </div>
+                        <div class="p-4 flex-1 flex flex-col">
+                            <h4 class="font-black text-slate-800 text-sm mb-1">₱50 GCash/Load</h4>
+                            <p class="text-violet-600 font-black text-xs">200 Pts</p>
+                            <div class="mt-4 flex gap-2">
+                                <button class="flex-1 py-1.5 bg-slate-50 text-slate-600 text-[10px] font-black rounded-lg hover:bg-slate-100 transition-all">EDIT</button>
+                                <button class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-all"><span class="material-symbols-outlined text-[18px]">delete</span></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── TAB 4: MISSION & VISION ─── -->
+            <div id="view-about" class="hidden animate-fade">
+                <div class="max-w-4xl mx-auto space-y-6">
+                    <div class="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-sm border border-slate-200 text-center relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-violet-600 to-indigo-600"></div>
+                        <img src="{{ url_for('static', filename='Images/BAYANIHANHUB_LOGO.png') }}" class="w-24 h-24 mx-auto mb-6 drop-shadow-lg" onerror="this.src='https://via.placeholder.com/100?text=BH'">
+                        <h2 class="text-3xl md:text-4xl font-black text-slate-800 tracking-tight mb-4" data-en="Our Mission" data-ceb="Atong Misyon">Our Mission</h2>
+                        <p class="text-slate-600 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mx-auto" data-en="To empower citizens and LGUs through a transparent, fast, and unified community response system." data-ceb="Ang paghatag og gahum sa mga lumulupyo ug LGU pinaagi sa usa ka transparent, paspas, ug nahiusa nga sistema.">To empower citizens and LGUs through a transparent, fast, and unified community response system.</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-violet-700 to-indigo-800 p-8 md:p-12 rounded-[2.5rem] shadow-xl text-center text-white relative overflow-hidden">
+                        <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-4 flex items-center justify-center gap-3"><span class="material-symbols-outlined text-4xl text-violet-300">visibility</span> <span data-en="Our Vision" data-ceb="Atong Panan-awon">Our Vision</span></h2>
+                        <p class="text-violet-100 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mx-auto" data-en="A smart and resilient barangay driven by citizen participation and powered by accessible technology." data-ceb="Usa ka maalamon ug lig-on nga barangay nga gipalihok sa aktibong partisipasyon sa mga lumulupyo.">A smart and resilient barangay driven by citizen participation and powered by accessible technology.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ─── SETTINGS MODAL ─── -->
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex items-end md:items-center justify-center p-0 md:p-4 transition-all" id="settingsModal">
+        <div class="bg-white rounded-t-[2rem] md:rounded-[2.5rem] w-full max-w-md shadow-2xl overflow-hidden animate-fade border border-slate-100 flex flex-col max-h-[90vh]">
+            <div class="p-5 md:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
+                <h3 class="text-lg md:text-xl font-black text-slate-800 flex items-center gap-2 tracking-tight">
+                    <span class="material-symbols-outlined text-violet-600">manage_accounts</span>
+                    <span data-en="System Settings" data-ceb="Mga Setting sa Akawnt">System Settings</span>
+                </h3>
+                <button onclick="document.getElementById('settingsModal').classList.add('hidden')" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors shadow-sm border border-slate-200 active:scale-95">
+                    <span class="material-symbols-outlined text-[18px] md:text-[24px]">close</span>
+                </button>
+            </div>
+            <div class="p-6 md:p-8 space-y-6 overflow-y-auto">
+                <div>
+                    <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3" data-en="Admin Info" data-ceb="Personal nga Impormasyon">Admin Info</h4>
+                    <div class="space-y-3">
+                        <input type="text" value="{{ user['full_name'] }}" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:border-violet-500 outline-none" placeholder="Full Name">
+                        <input type="email" value="{{ user['email'] }}" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-400 bg-slate-50 outline-none cursor-not-allowed" readonly>
+                    </div>
+                </div>
+                <button onclick="saveSettings()" class="w-full bg-slate-900 text-white font-black text-base py-3.5 rounded-xl shadow-lg hover:bg-slate-800 active:scale-95 transition-all">Save Config</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── BUG REPORT MODAL ─── -->
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex items-end md:items-center justify-center p-0 md:p-4 transition-all" id="bugReportModal">
+        <div class="bg-white rounded-t-[2rem] md:rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden animate-fade border border-slate-100 flex flex-col max-h-[90vh]">
+            <div class="p-5 md:p-6 border-b border-slate-100 flex justify-between items-center bg-rose-50/50 shrink-0">
+                <h3 class="text-lg md:text-xl font-black text-slate-800 flex items-center gap-2 tracking-tight">
+                    <span class="material-symbols-outlined text-rose-500">bug_report</span>
+                    <span data-en="Report System Bug" data-ceb="I-report ang Bug">Report System Bug</span>
+                </h3>
+                <button onclick="closeBugReport()" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors shadow-sm border border-slate-200 active:scale-95">
+                    <span class="material-symbols-outlined text-[18px] md:text-[24px]">close</span>
+                </button>
+            </div>
+            <form onsubmit="submitBugReport(event)" class="p-6 md:p-8 space-y-5 overflow-y-auto">
+                <div>
+                    <label class="text-[10px] md:text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Issue Description</label>
+                    <textarea id="bugDescription" rows="4" class="w-full mt-2 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-700 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 outline-none transition-all font-medium resize-none shadow-sm" placeholder="Please describe what went wrong..." required></textarea>
+                </div>
+                <div>
+                    <label class="text-[10px] md:text-[11px] font-extrabold text-slate-400 uppercase tracking-widest">Attach Screenshot (Optional)</label>
+                    <input type="file" id="bugScreenshot" accept="image/*" class="w-full mt-2 text-xs md:text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-rose-50 file:text-rose-600 hover:file:bg-rose-100 cursor-pointer transition-all">
+                </div>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex gap-3 items-center">
+                    <span class="material-symbols-outlined text-slate-400">mail</span>
+                    <p class="text-xs text-slate-500 font-medium">Sending to: <strong class="text-slate-700">admin.bayanihanhub@cebu.gov.ph</strong></p>
+                </div>
+                <button type="submit" class="w-full bg-gradient-to-r from-rose-500 to-red-600 text-white font-black text-base md:text-lg py-4 rounded-xl shadow-lg shadow-rose-500/30 active:scale-95 transition-all">Send Bug Report</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="fixed top-6 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-6 py-3.5 rounded-full font-bold shadow-2xl opacity-0 pointer-events-none transition-all duration-300 z-[200] flex items-center gap-3 border border-slate-700 w-max max-w-[90vw]">
+        <span class="material-symbols-outlined text-violet-400" id="toastIcon">info</span><span id="toastMsg" class="text-sm">Message</span>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); document.getElementById('sidebarOverlay').classList.toggle('hidden'); }
+        function toggleProfileMenu() { document.getElementById('profileMenu').classList.toggle('hidden'); }
+        function openSettings() { document.getElementById('settingsModal').classList.remove('hidden'); document.getElementById('profileMenu').classList.add('hidden'); }
+        function saveSettings() { document.getElementById('settingsModal').classList.add('hidden'); showToast("System configuration saved!"); }
+        function openBugReport() { document.getElementById('bugReportModal').classList.remove('hidden'); document.getElementById('profileMenu').classList.add('hidden'); }
+        function closeBugReport() { document.getElementById('bugReportModal').classList.add('hidden'); }
+        function submitBugReport(e) { e.preventDefault(); const btn = e.target.querySelector('button[type="submit"]'); btn.innerHTML = "Sending..."; setTimeout(() => { showToast("Sent to admin.bayanihanhub@cebu.gov.ph!"); closeBugReport(); btn.innerHTML = "Send Bug Report"; }, 1500); }
+        window.onclick = function(e) { if (!e.target.closest('.relative')) { const pm = document.getElementById('profileMenu'); if(pm) pm.classList.add('hidden'); } }
+
+        let currentLang = 'en'; 
+        function toggleLang() {
+            currentLang = currentLang === 'en' ? 'ceb' : 'en';
+            document.getElementById('langBtn').innerHTML = `<span class="material-symbols-outlined text-[16px]">translate</span> ${currentLang.toUpperCase()}`;
+            document.querySelectorAll('[data-en]').forEach(el => {
+                if(el.tagName.toLowerCase() === 'option') el.innerText = el.getAttribute(`data-${currentLang}`);
+                else el.innerHTML = el.getAttribute(`data-${currentLang}`);
+            });
+        }
+
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast'); document.getElementById('toastMsg').innerText = msg;
+            const icon = document.getElementById('toastIcon');
+            icon.innerText = isError ? 'error' : 'check_circle';
+            icon.className = `material-symbols-outlined ${isError ? 'text-rose-400' : 'text-emerald-400'}`;
+            toast.classList.remove('opacity-0', '-translate-y-5');
+            setTimeout(() => toast.classList.add('opacity-0', '-translate-y-5'), 3000);
+        }
+
+        function switchTab(tabName) {
+            if(window.innerWidth < 768) { toggleSidebar(); }
+            ['live', 'transparency', 'inventory', 'about'].forEach(t => {
+                document.getElementById(`view-${t}`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).className = "w-full flex items-center gap-3.5 px-4 py-4 rounded-2xl font-bold text-sm border transition-all tab-inactive group";
+            });
+            document.getElementById(`view-${tabName}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabName}`).className = "w-full flex items-center gap-3.5 px-4 py-4 rounded-2xl font-bold text-sm border transition-all tab-active group";
+            if(tabName === 'live') { setTimeout(() => map.invalidateSize(), 100); } 
+            document.getElementById('mainScroll').scrollTo(0,0);
+        }
+
+        setInterval(() => { document.getElementById('currentDateTime').innerText = new Date().toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' }); }, 1000);
+
+        const map = L.map('adminMap').setView([10.3157, 123.8854], 14); 
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
+        const redIcon = L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41] });
+        const orangeIcon = L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41] });
+        let currentMarkers = [];
+
+        function getUrgency(category) {
+            if(category.includes('Safety')) return { badge: '<span class="bg-rose-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider animate-pulse inline-block">⚠️ Urgent</span>' };
+            if(category.includes('Infrastructure')) return { badge: '<span class="bg-orange-500 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider inline-block">High</span>' };
+            return { badge: '<span class="bg-slate-200 text-slate-600 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider inline-block">Normal</span>' };
+        }
+
+        const dummyReports = [
+            { report_id: 'dummy_1', category: 'Infrastructure', location: 'Gov. M. Cuenco Ave, Cebu City', description: 'Malalim na lubak sa kalsada.', image_path: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600&q=80', status: 'In Progress', timestamp: new Date(Date.now() - 86400000).toISOString(), full_name: 'Juan Dela Cruz' },
+            { report_id: 'dummy_2', category: 'Sanitation', location: 'Colon Street', description: 'Tambak na basura.', image_path: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=600&q=80', status: 'Resolved', timestamp: new Date(Date.now() - 172800000).toISOString(), full_name: 'Maria Clara' }
+        ];
+
+        let localAdminState = JSON.parse(localStorage.getItem('bh_admin_state')) || {};
+
+        async function fetchAdminReports() {
+            try {
+                let dbReports = [];
+                try { const res = await fetch('/api/get-reports'); if(res.ok) { const data = await res.json(); if(Array.isArray(data)) dbReports = data; } } catch(e) {}
+                let allReports = [...dbReports, ...dummyReports];
+                currentMarkers.forEach(m => map.removeLayer(m)); currentMarkers = [];
+                let pending = 0, inprogress = 0, resolved = 0;
+                const activeContainer = document.getElementById('activeTicketsTable');
+                const resolvedTable = document.getElementById('resolvedTicketsTable');
+                activeContainer.innerHTML = ''; resolvedTable.innerHTML = '';
+
+                allReports.forEach(report => {
+                    const rId = report.report_id;
+                    if(localAdminState[rId]) { report.status = localAdminState[rId]; }
+                    const urgency = getUrgency(report.category);
+                    if(report.status === 'Pending') pending++; else if(report.status === 'In Progress') inprogress++; else resolved++;
+
+                    const dateStr = new Date(report.timestamp).toLocaleDateString();
+                    const imageHtml = report.image_path ? `<img src="${report.image_path}" class="w-16 h-16 rounded-xl object-cover border border-slate-200">` : `<div class="w-16 h-16 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300"><span class="material-symbols-outlined">image</span></div>`;
+
+                    if(report.status === 'Resolved') {
+                        resolvedTable.innerHTML += `<tr class="hover:bg-slate-50"><td class="p-4 flex items-center gap-4">${imageHtml}<div><p class="font-black text-slate-800 text-sm">#REP-${rId}</p><p class="text-[10px] text-slate-400 font-bold">${dateStr}</p></div></td><td class="p-4"><p class="font-bold text-slate-700 text-xs">${report.category}</p><p class="text-[10px] text-slate-500 line-clamp-1">${report.location}</p></td><td class="p-4"><span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-black border border-emerald-100 uppercase">Verified Resolved</span></td></tr>`;
+                    } else {
+                        const markerIcon = report.status === 'In Progress' ? orangeIcon : redIcon;
+                        const marker = L.marker([10.3157 + (Math.random()*0.02 - 0.01), 123.8854 + (Math.random()*0.02 - 0.01)], {icon: markerIcon}).bindPopup(`<b>#REP-${rId}</b><br>${report.category}`).addTo(map);
+                        currentMarkers.push(marker);
+
+                        activeContainer.innerHTML += `
+                            <tr class="hover:bg-violet-50 transition-colors border-b border-slate-100">
+                                <td class="p-4 flex items-center gap-4">
+                                    <div class="shrink-0 cursor-pointer" onclick="window.open('${report.image_path}', '_blank')">${imageHtml}</div>
+                                    <div><p class="text-[10px] font-black text-slate-400">#REP-${rId}</p>${urgency.badge}</div>
+                                </td>
+                                <td class="p-4">
+                                    <h4 class="font-black text-slate-800 text-sm">${report.category}</h4>
+                                    <p class="text-[10px] text-slate-500 font-bold">${report.location}</p>
+                                    <p class="text-[10px] text-violet-600 font-black mt-1">👤 ${report.full_name || 'Citizen'}</p>
+                                </td>
+                                <td class="p-4">
+                                    <span class="text-[10px] font-black uppercase ${report.status === 'Pending' ? 'text-rose-500' : 'text-amber-500'} flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[14px]">${report.status === 'Pending' ? 'warning' : 'engineering'}</span> ${report.status}
+                                    </span>
+                                </td>
+                                <td class="p-4 text-right">
+                                    <div class="flex gap-2 justify-end">
+                                        ${report.status === 'Pending' ? `<button onclick="updateStatus('${rId}', 'In Progress', this)" class="px-3 py-2 bg-amber-500 text-white text-[10px] font-black rounded-lg shadow-sm">DISPATCH</button>` : ''}
+                                        <button onclick="updateStatus('${rId}', 'Resolved', this)" class="px-3 py-2 bg-emerald-500 text-white text-[10px] font-black rounded-lg shadow-sm">RESOLVE</button>
+                                    </div>
+                                </td>
+                            </tr>`;
+                    }
+                });
+                document.getElementById('stat-total').innerText = pending + inprogress;
+                document.getElementById('stat-pending').innerText = pending;
+                document.getElementById('stat-inprogress').innerText = inprogress;
+            } catch(e) {}
+        }
+
+        async function updateStatus(reportId, newStatus, btn) {
+            btn.innerHTML = "...";
+            try {
+                if(reportId.toString().includes('dummy')) {
+                    setTimeout(() => { localAdminState[reportId] = newStatus; localStorage.setItem('bh_admin_state', JSON.stringify(localAdminState)); showToast(`Updated to ${newStatus}`); fetchAdminReports(); }, 800);
+                } else {
+                    const res = await fetch('/api/update-status', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ report_id: reportId, status: newStatus }) });
+                    if(res.ok) { showToast(`Ticket updated!`); fetchAdminReports(); }
+                }
+            } catch(e) { showToast("Error", true); }
+        }
+
+        fetchAdminReports();
+    </script>
+</body>
+</html>

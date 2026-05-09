@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Dashboard | BayanihanHub</title>
+    <title>Citizen Dashboard | BayanihanHub</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -11,52 +11,78 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
     <style>
+        * { -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Manrope', sans-serif; background-color: #f4f5f8; color: #0f172a; }
+        
         .material-symbols-outlined { font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24; }
-        ::-webkit-scrollbar { width: 6px; }
+        .icon-filled { font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background-color: #d8b4fe; border-radius: 10px; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade { animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-fade { animation: fadeIn 0.4s ease-out forwards; }
         .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255, 255, 255, 0.5); }
         
-        /* Sari-Sari Store Animations */
+        .tab-active { background-color: #ede9fe; color: #6d28d9; border-color: #ddd6fe; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        .tab-inactive { color: #64748b; border-color: transparent; }
+        .tab-inactive:hover { background-color: #f8fafc; color: #6d28d9; }
+
         @keyframes swing { 0% { transform: rotate(3deg); } 50% { transform: rotate(-3deg); } 100% { transform: rotate(3deg); } }
         .banderitas { animation: swing 3s ease-in-out infinite; transform-origin: top; display: inline-block; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden text-slate-800">
 
+    <!-- MOBILE OVERLAY -->
+    <div id="sidebarOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 hidden transition-opacity md:hidden"></div>
+
     <!-- ─── SIDEBAR ─── -->
-    <aside class="w-72 bg-white border-r border-slate-200/60 hidden md:flex flex-col justify-between h-full z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)] shrink-0">
+    <aside id="sidebar" class="fixed md:relative inset-y-0 left-0 w-72 bg-white/95 backdrop-blur-xl border-r border-slate-200/60 flex flex-col z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 shadow-[4px_0_24px_rgba(0,0,0,0.04)] shrink-0">
         <div>
-            <div class="h-24 flex items-center px-8 border-b border-slate-100">
-                <img src="{{ url_for('static', filename='Images/BAYANIHANHUB_LOGO.png') }}" alt="Logo" class="w-11 h-11 object-contain mr-3" onerror="this.src='https://via.placeholder.com/44?text=BH'">
-                <span class="font-extrabold text-2xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-violet-700 to-indigo-600">BayaniHub</span>
+            <div class="h-20 md:h-24 flex items-center justify-between px-6 md:px-8 border-b border-slate-100">
+                <div class="flex items-center">
+                    <img src="{{ url_for('static', filename='Images/BAYANIHANHUB_LOGO.png') }}" alt="Logo" class="w-9 h-9 md:w-11 md:h-11 object-contain mr-3" onerror="this.src='https://via.placeholder.com/44?text=BH'">
+                    <div>
+                        <span class="font-extrabold text-lg md:text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-violet-700 to-indigo-600 block leading-none">BayaniHub</span>
+                        <span class="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest" data-en="Citizen App" data-ceb="App sa Lumulupyo">Citizen App</span>
+                    </div>
+                </div>
+                <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-rose-500 p-2 -mr-2"><span class="material-symbols-outlined">close</span></button>
             </div>
 
-            <nav class="p-5 space-y-2">
-                <p class="px-4 text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.2em] mb-3 mt-4" data-en="Menu" data-ceb="Menu">Menu</p>
-                <a href="#" class="flex items-center gap-3.5 px-4 py-4 bg-violet-50 text-violet-700 rounded-2xl font-bold text-sm shadow-sm border border-violet-100 transition-all">
-                    <span class="material-symbols-outlined">dashboard</span>
-                    <span data-en="Dashboard" data-ceb="Dashboard">Dashboard</span>
-                </a>
-                <a href="#" class="flex items-center gap-3.5 px-4 py-4 text-slate-500 hover:bg-slate-50 hover:text-violet-700 rounded-2xl font-semibold text-sm transition-all group">
-                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform">assignment</span>
-                    <span data-en="My Reports" data-ceb="Akong Mga Report">My Reports</span>
-                </a>
-                <a href="#" onclick="document.getElementById('rewardsModal').classList.remove('hidden')" class="flex items-center gap-3.5 px-4 py-4 text-orange-600 bg-orange-50 hover:bg-orange-100 border border-orange-100 rounded-2xl font-bold text-sm transition-all group shadow-sm">
-                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform text-orange-500">storefront</span>
-                    <span data-en="Sari-Sari Store" data-ceb="Tindahan sa Barangay">Sari-Sari Store</span>
-                </a>
+            <nav class="p-4 md:p-5 space-y-2 mt-2 overflow-y-auto">
+                <p class="px-4 text-[10px] md:text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.2em] mb-3" data-en="Menu" data-ceb="Menu">Menu</p>
+                
+                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="w-full flex items-center gap-3.5 px-4 py-3.5 md:py-4 rounded-2xl font-bold text-sm border transition-all tab-active group active:scale-95">
+                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform">dashboard</span> <span data-en="Overview" data-ceb="Kinatibuk-an">Overview</span>
+                </button>
+                <button onclick="switchTab('feed')" id="tab-feed" class="w-full flex items-center gap-3.5 px-4 py-3.5 md:py-4 rounded-2xl font-bold text-sm border transition-all tab-inactive group active:scale-95">
+                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform">public</span> <span data-en="Community Feed" data-ceb="Balita sa Komunidad">Community Feed</span>
+                </button>
+                <button onclick="switchTab('store')" id="tab-store" class="w-full flex items-center gap-3.5 px-4 py-3.5 md:py-4 rounded-2xl font-bold text-sm border transition-all tab-inactive group active:scale-95">
+                    <span class="material-symbols-outlined text-orange-500 group-hover:scale-110 transition-transform">storefront</span> <span class="text-orange-700" data-en="Sari-Sari Rewards" data-ceb="Ganti sa Tindahan">Sari-Sari Rewards</span>
+                </button>
+                
+                <p class="px-4 text-[10px] md:text-[11px] font-extrabold text-slate-400 uppercase tracking-[0.2em] mb-3 mt-6" data-en="Support" data-ceb="Suporta">Support</p>
+                <button onclick="openSettings()" class="w-full flex items-center gap-3.5 px-4 py-3.5 md:py-4 rounded-2xl font-bold text-sm border transition-all tab-inactive group active:scale-95">
+                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform">settings</span> <span data-en="Account Settings" data-ceb="Mga Setting">Account Settings</span>
+                </button>
+                <button onclick="openBugReport()" class="w-full flex items-center gap-3.5 px-4 py-3.5 md:py-4 rounded-2xl font-bold text-sm border border-rose-50/50 hover:bg-rose-50 hover:border-rose-100 transition-all text-slate-600 group active:scale-95 mt-1">
+                    <span class="material-symbols-outlined text-rose-500 group-hover:scale-110 transition-transform">bug_report</span> 
+                    <span class="group-hover:text-rose-700 transition-colors" data-en="Report System Bug" data-ceb="I-report ang Bug">Report System Bug</span>
+                </button>
             </nav>
         </div>
 
-        <div class="p-6 border-t border-slate-100">
-            <button onclick="window.location.href='/api/logout'" class="w-full flex items-center justify-center gap-2 px-4 py-3.5 text-rose-500 hover:bg-rose-50 hover:shadow-sm rounded-2xl font-bold text-sm transition-all border border-transparent hover:border-rose-100">
-                <span class="material-symbols-outlined">logout</span>
-                <span data-en="Logout" data-ceb="Gawas">Logout</span>
-            </button>
+        <div class="p-6 border-t border-slate-100 mt-auto bg-violet-50/50 m-4 rounded-[2rem] border border-violet-100 text-center relative overflow-hidden shrink-0">
+            <div class="absolute -top-10 -right-10 w-24 h-24 bg-violet-200 rounded-full blur-xl opacity-50"></div>
+            <p class="text-xs font-bold text-slate-500 mb-1" data-en="Current Rank" data-ceb="Kasamtangang Rango">Current Rank</p>
+            <h4 class="text-lg font-black text-violet-700 mb-2 flex items-center justify-center gap-1" id="citizenRank"><span class="material-symbols-outlined text-xl">military_tech</span> Loading...</h4>
+            <div class="w-full bg-slate-200 rounded-full h-2 mb-1">
+                <div class="bg-gradient-to-r from-violet-500 to-fuchsia-500 h-2 rounded-full" id="rankProgress" style="width: 0%"></div>
+            </div>
+            <p class="text-[9px] font-bold text-slate-400" data-en="Earn points to rank up!" data-ceb="Pag-ipon og points!">Earn points to rank up!</p>
         </div>
     </aside>
 
@@ -64,188 +90,439 @@
     <main class="flex-1 flex flex-col h-screen overflow-hidden relative bg-[#f4f5f8]">
         
         <!-- HEADER -->
-        <header class="h-24 glass-panel flex items-center justify-between px-8 z-10 sticky top-0 shrink-0">
-            <div class="flex items-center gap-4">
-                <button class="md:hidden p-2 text-slate-500 hover:text-violet-700 transition-colors bg-white rounded-xl shadow-sm border border-slate-200">
+        <header class="h-20 md:h-24 glass-panel flex items-center justify-between px-4 md:px-8 z-10 sticky top-0 shrink-0">
+            <div class="flex items-center gap-3 md:gap-4">
+                <button onclick="toggleSidebar()" class="md:hidden p-2.5 text-slate-500 hover:text-violet-700 bg-white rounded-xl shadow-sm border border-slate-200 active:scale-95 transition-transform flex items-center justify-center">
                     <span class="material-symbols-outlined">menu</span>
                 </button>
-                <h1 class="text-2xl font-black text-slate-800 hidden sm:block tracking-tight" data-en="Overview" data-ceb="Kinatibuk-an">Overview</h1>
+                <h1 class="text-xl md:text-2xl font-black text-slate-800 tracking-tight hidden sm:block" id="headerTitle" data-en="Home" data-ceb="Panimalay">Home</h1>
             </div>
             
-            <div class="flex items-center gap-5">
-                <button onclick="toggleLang()" id="langBtn" class="flex items-center gap-1 bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-xl font-extrabold text-xs hover:border-violet-300 hover:text-violet-700 transition-all shadow-sm">
-                    <span class="material-symbols-outlined text-[18px]">translate</span> EN
+            <div class="flex items-center gap-3 md:gap-5">
+                <!-- POINTS PILL -->
+                <div onclick="switchTab('store')" class="bg-gradient-to-r from-orange-100 to-amber-50 border border-orange-200 text-orange-700 px-3 md:px-5 py-1.5 md:py-2.5 rounded-full font-black text-xs md:text-sm flex items-center gap-1.5 md:gap-2 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer active:scale-95">
+                    <span class="material-symbols-outlined text-[16px] md:text-xl text-orange-500">local_activity</span>
+                    <span id="userPointsDisplay">{{ user['hero_points'] }} Pts</span>
+                </div>
+
+                <button onclick="toggleLang()" id="langBtn" class="flex items-center gap-1 bg-white border border-slate-200 text-slate-600 px-3 py-1.5 md:px-4 md:py-2 rounded-xl font-extrabold text-xs hover:border-violet-300 hover:text-violet-700 transition-all shadow-sm active:scale-95">
+                    <span class="material-symbols-outlined text-[16px] md:text-[18px]">translate</span> EN
                 </button>
 
-                <div onclick="document.getElementById('rewardsModal').classList.remove('hidden')" class="hidden sm:flex bg-gradient-to-r from-amber-100 to-yellow-50 border border-amber-200 text-amber-700 px-5 py-2.5 rounded-full font-black text-sm items-center gap-2 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer">
-                    <span class="material-symbols-outlined text-xl text-amber-500">storefront</span>
-                    <span>{{ user['hero_points'] }} Pts</span>
-                </div>
-                
-                <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-violet-600 to-fuchsia-500 border-[3px] border-white shadow-md shadow-violet-500/30 flex items-center justify-center text-white font-bold text-lg">
-                    {{ user['full_name'][0] | upper }}
+                <!-- PROFILE DROPDOWN -->
+                <div class="relative">
+                    <button onclick="toggleProfileMenu()" class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-tr from-violet-600 to-fuchsia-500 text-white shadow-md shadow-violet-500/30 flex items-center justify-center font-black text-lg md:text-xl border-[3px] border-white focus:outline-none hover:scale-105 transition-transform">
+                        {{ user['full_name'][0] | upper }}
+                    </button>
+                    <div id="profileMenu" class="hidden absolute right-0 mt-3 w-56 bg-white border border-slate-100 rounded-2xl shadow-xl py-2 z-50 animate-fade">
+                        <div class="px-5 py-3 border-b border-slate-50 mb-1">
+                            <p class="text-sm font-black text-slate-800 line-clamp-1">{{ user['full_name'] }}</p>
+                            <p class="text-[10px] text-violet-500 font-extrabold uppercase tracking-widest line-clamp-1">{{ user['email'] }}</p>
+                        </div>
+                        <a href="#" onclick="openSettings()" class="flex items-center gap-2 px-5 py-3 text-sm font-bold text-slate-600 hover:bg-violet-50 hover:text-violet-700 transition-colors" data-en="Settings" data-ceb="Mga Setting">
+                            <span class="material-symbols-outlined text-[18px]">settings</span> Settings
+                        </a>
+                        <a href="#" onclick="openBugReport()" class="flex items-center gap-2 px-5 py-3 text-sm font-bold text-slate-600 hover:bg-rose-50 hover:text-rose-600 transition-colors" data-en="Report Bug" data-ceb="I-report ang Bug">
+                            <span class="material-symbols-outlined text-[18px]">bug_report</span> Report Bug
+                        </a>
+                        <a href="/api/logout" class="flex items-center gap-2 px-5 py-3 text-sm font-bold text-rose-600 hover:bg-rose-50 transition-colors" data-en="Logout" data-ceb="Gawas">
+                            <span class="material-symbols-outlined text-[18px]">logout</span> Logout
+                        </a>
+                    </div>
                 </div>
             </div>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-6 md:p-10 w-full max-w-7xl mx-auto pb-24">
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 w-full max-w-7xl mx-auto pb-24" id="mainScroll">
             
-            <!-- HERO BANNER -->
-            <div class="bg-gradient-to-br from-violet-700 via-violet-600 to-indigo-700 rounded-[2.5rem] p-10 md:p-12 text-white shadow-2xl shadow-violet-700/20 mb-10 flex flex-col md:flex-row items-center justify-between gap-10 relative overflow-hidden animate-fade">
-                <div class="absolute inset-0 opacity-[0.07] pointer-events-none" style="background-image: linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px); background-size: 32px 32px;"></div>
-                <div class="absolute -top-24 -right-24 w-96 h-96 bg-fuchsia-400 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-pulse"></div>
+            <!-- ─── TAB 1: DASHBOARD OVERVIEW ─── -->
+            <div id="view-dashboard" class="block animate-fade">
                 
-                <div class="relative z-10 w-full md:w-2/3">
-                    <span class="inline-block bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full text-xs font-extrabold tracking-wide mb-5 border border-white/20" data-en="Citizen Dashboard" data-ceb="Dashboard sa Lumulupyo">Citizen Dashboard</span>
-                    <h2 class="text-4xl md:text-5xl font-black mb-4 leading-tight tracking-tight"><span data-en="Good Day" data-ceb="Maayong Adlaw">Good Day</span>, {{ user['full_name'].split()[0] }}! 👋</h2>
-                    <p class="text-violet-100 text-lg md:text-xl leading-relaxed max-w-2xl font-medium" data-en="See an issue in your community? Report it with a photo to earn reward points." data-ceb="May nakitang problema sa komunidad? Picturan ug i-report para makaipon og points.">See an issue in your community? Report it with a photo to earn reward points.</p>
+                <!-- HERO BANNER -->
+                <div class="bg-gradient-to-br from-violet-700 via-violet-600 to-indigo-700 rounded-[2.5rem] p-8 md:p-12 text-white shadow-2xl shadow-violet-700/20 mb-8 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+                    <div class="absolute inset-0 opacity-[0.07] pointer-events-none" style="background-image: linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px); background-size: 32px 32px;"></div>
+                    <div class="absolute -top-24 -right-24 w-96 h-96 bg-fuchsia-400 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-pulse"></div>
+                    
+                    <div class="relative z-10 w-full md:w-2/3 text-center md:text-left">
+                        <span class="inline-block bg-white/20 backdrop-blur-md px-4 py-1.5 rounded-full text-[10px] md:text-xs font-extrabold tracking-wide mb-4 border border-white/20" data-en="BayanihanHub Citizen" data-ceb="Lumulupyo sa BayanihanHub">BayanihanHub Citizen</span>
+                        <h2 class="text-3xl md:text-5xl font-black mb-3 md:mb-4 leading-tight tracking-tight"><span data-en="Good Day" data-ceb="Maayong Adlaw">Good Day</span>, {{ user['full_name'].split()[0] }}! 👋</h2>
+                        <p class="text-violet-100 text-sm md:text-lg leading-relaxed max-w-2xl font-medium mx-auto md:mx-0" data-en="Report community issues with a photo and earn points for rewards." data-ceb="I-report ang mga isyu sa komunidad gamit ang litrato ug makakuha og points.">Report community issues with a photo and earn points for rewards.</p>
+                    </div>
+                    
+                    <button onclick="document.getElementById('reportModal').classList.remove('hidden')" class="relative z-10 bg-white text-violet-700 px-8 py-4 md:py-5 rounded-[1.5rem] font-extrabold shadow-xl hover:bg-violet-50 hover:-translate-y-1 hover:shadow-2xl hover:shadow-white/20 active:scale-95 transition-all flex items-center justify-center gap-3 w-full md:w-auto text-base md:text-lg whitespace-nowrap">
+                        <span class="material-symbols-outlined text-2xl animate-bounce">add_a_photo</span>
+                        <span data-en="Report Issue" data-ceb="I-report Kini">Report Issue</span>
+                    </button>
+                </div>
+
+                <!-- STATS -->
+                <div class="grid grid-cols-3 gap-3 md:gap-6 mb-8">
+                    <div class="bg-white p-4 md:p-7 rounded-[1.5rem] md:rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 text-center md:text-left md:flex md:items-center md:gap-5">
+                        <div class="w-10 h-10 md:w-14 md:h-14 mx-auto md:mx-0 rounded-xl md:rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center mb-2 md:mb-0"><span class="material-symbols-outlined md:text-3xl">folder_open</span></div>
+                        <div><p class="text-[9px] md:text-xs font-black text-slate-400 uppercase tracking-widest" data-en="Total" data-ceb="Tanan">Total</p><p class="text-xl md:text-3xl font-black text-slate-800" id="stat-total">0</p></div>
+                    </div>
+                    <div class="bg-white p-4 md:p-7 rounded-[1.5rem] md:rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 text-center md:text-left md:flex md:items-center md:gap-5">
+                        <div class="w-10 h-10 md:w-14 md:h-14 mx-auto md:mx-0 rounded-xl md:rounded-2xl bg-orange-50 text-orange-500 flex items-center justify-center mb-2 md:mb-0"><span class="material-symbols-outlined md:text-3xl">engineering</span></div>
+                        <div><p class="text-[9px] md:text-xs font-black text-slate-400 uppercase tracking-widest" data-en="Fixing" data-ceb="Gi-ayo">Fixing</p><p class="text-xl md:text-3xl font-black text-slate-800" id="stat-pending">0</p></div>
+                    </div>
+                    <div class="bg-white p-4 md:p-7 rounded-[1.5rem] md:rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 text-center md:text-left md:flex md:items-center md:gap-5">
+                        <div class="w-10 h-10 md:w-14 md:h-14 mx-auto md:mx-0 rounded-xl md:rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center mb-2 md:mb-0"><span class="material-symbols-outlined md:text-3xl">task_alt</span></div>
+                        <div><p class="text-[9px] md:text-xs font-black text-slate-400 uppercase tracking-widest" data-en="Done" data-ceb="Nahuman">Done</p><p class="text-xl md:text-3xl font-black text-slate-800" id="stat-resolved">0</p></div>
+                    </div>
+                </div>
+
+                <!-- MAP + LEADERBOARD -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 mb-8">
+                    <!-- MAP -->
+                    <div class="lg:col-span-2 flex flex-col h-[400px] md:h-[500px]">
+                        <h3 class="text-lg md:text-2xl font-black text-slate-800 tracking-tight mb-3 md:mb-4 px-2 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-violet-600">map</span>
+                            <span data-en="Live Community Map" data-ceb="Aktibong Mapa sa Komunidad">Live Community Map</span>
+                        </h3>
+                        <div class="bg-white rounded-[2rem] p-2 md:p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex-1 relative z-0 w-full"><div id="map" class="w-full h-full rounded-[1.5rem] z-0"></div></div>
+                    </div>
+
+                    <!-- LEADERBOARD (FIXED CRAMPED LAYOUT) -->
+                    <div class="lg:col-span-1 flex flex-col h-full">
+                        <h3 class="text-lg md:text-2xl font-black text-slate-800 tracking-tight mb-3 md:mb-4 px-2 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-amber-500">emoji_events</span>
+                            <span data-en="Top Citizens" data-ceb="Mga Top nga Lumulupyo">Top Citizens</span>
+                        </h3>
+                        <!-- Adjusted Padding and Gap for breathing room -->
+                        <div class="bg-white rounded-[2rem] p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex-1 flex flex-col gap-5 overflow-hidden relative">
+                            <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-amber-100 rounded-full blur-2xl opacity-50"></div>
+                            
+                            <!-- Rank 1 -->
+                            <div class="flex items-center gap-4 bg-gradient-to-r from-amber-50 to-yellow-50 p-5 rounded-2xl border border-amber-100/50 relative z-10">
+                                <div class="w-12 h-12 rounded-full bg-amber-400 text-white font-black flex items-center justify-center text-xl shadow-md border-2 border-white shrink-0">1</div>
+                                <div class="flex-1">
+                                    <h4 class="font-black text-slate-800 text-base">Maria Clara</h4>
+                                    <p class="text-[10px] text-amber-600 font-bold uppercase tracking-wider">Bayani ng Bayan</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-black text-slate-800 text-lg">450</p>
+                                    <p class="text-[9px] text-slate-400 font-bold uppercase">Pts</p>
+                                </div>
+                            </div>
+
+                            <!-- Rank 2 -->
+                            <div class="flex items-center gap-4 bg-slate-50 p-5 rounded-2xl border border-slate-100 relative z-10">
+                                <div class="w-12 h-12 rounded-full bg-slate-300 text-slate-600 font-black flex items-center justify-center text-xl shadow-inner border-2 border-white shrink-0">2</div>
+                                <div class="flex-1">
+                                    <h4 class="font-black text-slate-800 text-base">Juan Dela Cruz</h4>
+                                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Barangay Defender</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-black text-slate-800 text-lg">320</p>
+                                    <p class="text-[9px] text-slate-400 font-bold uppercase">Pts</p>
+                                </div>
+                            </div>
+
+                            <!-- Rank 3 -->
+                            <div class="flex items-center gap-4 bg-orange-50/50 p-5 rounded-2xl border border-orange-100/50 relative z-10">
+                                <div class="w-12 h-12 rounded-full bg-orange-300 text-white font-black flex items-center justify-center text-xl shadow-inner border-2 border-white shrink-0">3</div>
+                                <div class="flex-1">
+                                    <h4 class="font-black text-slate-800 text-base">Pedro Penduko</h4>
+                                    <p class="text-[10px] text-orange-600 font-bold uppercase tracking-wider">Barangay Defender</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-black text-slate-800 text-lg">180</p>
+                                    <p class="text-[9px] text-slate-400 font-bold uppercase">Pts</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Spacer to push 'You' to bottom -->
+                            <div class="flex-1"></div>
+
+                            <!-- You -->
+                            <div class="pt-5 border-t border-slate-100 flex items-center gap-4 relative z-10">
+                                <div class="w-10 h-10 rounded-full bg-violet-100 text-violet-600 font-black flex items-center justify-center text-sm border border-violet-200 shrink-0">YOU</div>
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-slate-600 text-sm line-clamp-1">{{ user['full_name'] }}</h4>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-black text-violet-600 text-base whitespace-nowrap">{{ user['hero_points'] }} Pts</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ─── TAB 2: COMMUNITY FEED ─── -->
+            <div id="view-feed" class="hidden animate-fade">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 px-2 max-w-2xl mx-auto gap-4">
+                    <div>
+                        <h3 class="text-2xl md:text-3xl font-black text-slate-800 tracking-tight" data-en="Community Feed" data-ceb="Balita sa Komunidad">Community Feed</h3>
+                        <p class="text-xs text-slate-500 font-bold mt-1">Posts are verified by the Barangay before appearing here.</p>
+                    </div>
+                    <button onclick="document.getElementById('reportModal').classList.remove('hidden')" class="bg-violet-100 text-violet-700 hover:bg-violet-600 hover:text-white px-4 py-2.5 rounded-xl font-black flex items-center justify-center gap-2 transition-all active:scale-95 text-xs md:text-sm shadow-sm border border-violet-200 w-full md:w-auto">
+                        <span class="material-symbols-outlined text-[18px]">edit_square</span> 
+                        <span data-en="New Post" data-ceb="Bag-ong Report">New Post</span>
+                    </button>
+                </div>
+                <div class="flex flex-col gap-6 max-w-2xl mx-auto" id="feedListContainer">
+                    <div class="p-10 text-center text-slate-400 font-bold">Loading feed...</div>
+                </div>
+            </div>
+
+            <!-- ─── TAB 3: SARI-SARI STORE ─── -->
+            <div id="view-store" class="hidden animate-fade">
+                <div class="relative p-8 md:p-12 mb-8 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center bg-gradient-to-b from-orange-200 to-amber-100 overflow-hidden border-b-[6px] border-amber-800/20 shadow-lg shadow-orange-500/10 text-center md:text-left gap-6">
+                    <div class="absolute top-[-5px] left-0 w-full text-4xl tracking-[0.3em] opacity-70 whitespace-nowrap hidden md:block">
+                        <span class="banderitas" style="animation-delay: 0s;">🎏</span><span class="banderitas" style="animation-delay: 0.2s;">🎏</span><span class="banderitas" style="animation-delay: 0.4s;">🎏</span><span class="banderitas" style="animation-delay: 0.1s;">🎏</span><span class="banderitas" style="animation-delay: 0.3s;">🎏</span><span class="banderitas" style="animation-delay: 0.5s;">🎏</span><span class="banderitas" style="animation-delay: 0.2s;">🎏</span><span class="banderitas" style="animation-delay: 0.6s;">🎏</span>
+                    </div>
+                    <div class="relative z-10">
+                        <h3 class="text-3xl md:text-5xl font-black text-amber-950 flex flex-col md:flex-row items-center gap-2 drop-shadow-sm font-serif">
+                            <span class="material-symbols-outlined text-5xl text-orange-600 mb-2 md:mb-0">storefront</span> Bayanihan Sari-Sari
+                        </h3>
+                        <p class="text-amber-800 font-bold mt-2 text-sm md:text-base" data-en="Redeem your hard-earned Hero Points here!" data-ceb="Ibaylo ang imong Hero Points dinhi!">Redeem your hard-earned Hero Points here!</p>
+                    </div>
+                    <div class="relative z-10 inline-flex flex-col items-center bg-amber-900/10 px-6 py-4 rounded-3xl border border-amber-900/20 backdrop-blur-sm">
+                        <p class="text-amber-900 font-black text-xs uppercase tracking-widest mb-1" data-en="Available Points" data-ceb="Magamit nga Puntos">Available Points</p>
+                        <span class="font-black text-orange-700 text-4xl" id="storePointsDisplay">{{ user['hero_points'] }}</span>
+                    </div>
                 </div>
                 
-                <button onclick="document.getElementById('reportModal').classList.remove('hidden')" class="relative z-10 bg-white text-violet-700 px-8 py-5 rounded-2xl font-extrabold shadow-xl hover:bg-violet-50 hover:-translate-y-1 hover:shadow-2xl hover:shadow-white/20 active:scale-95 transition-all flex items-center gap-3 w-full md:w-auto justify-center text-lg whitespace-nowrap">
-                    <span class="material-symbols-outlined text-2xl">add_a_photo</span>
-                    <span data-en="Report Issue" data-ceb="I-report Kini">Report Issue</span>
-                </button>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                    <!-- Rice -->
+                    <div class="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-xl hover:-translate-y-1 transition-all overflow-hidden border border-slate-100 flex flex-col group cursor-pointer">
+                        <div class="h-32 md:h-40 w-full relative overflow-hidden bg-slate-100">
+                            <span class="absolute top-3 right-3 bg-red-500 text-white text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider z-10 shadow-sm">Sulit!</span>
+                            <img src="https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=600&q=80" alt="Rice" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        </div>
+                        <div class="p-4 md:p-5 flex flex-col flex-1">
+                            <h4 class="font-black text-slate-800 text-sm md:text-base leading-tight mb-1">1 Kilo Bigas</h4>
+                            <p class="text-[10px] md:text-xs text-slate-500 font-medium mb-4" data-en="Claim at Brgy Hall" data-ceb="Kuhaon sa Brgy Hall">Claim at Brgy Hall</p>
+                            <div class="mt-auto">
+                                <button onclick="redeemItem('1 Kilo Bigas', 50)" class="w-full bg-orange-50 text-orange-600 font-black py-2.5 rounded-xl border border-orange-200 group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-amber-500 group-hover:text-white group-hover:border-transparent transition-all active:scale-95 text-xs flex items-center justify-center gap-1.5"><span class="material-symbols-outlined text-[16px]">local_activity</span> 50 Pts</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Canned Goods (EMOJI) -->
+                    <div class="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-xl hover:-translate-y-1 transition-all overflow-hidden border border-slate-100 flex flex-col group cursor-pointer">
+                        <div class="h-32 md:h-40 w-full relative overflow-hidden bg-slate-50 flex items-center justify-center">
+                            <span class="absolute top-3 right-3 bg-emerald-500 text-white text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider z-10 shadow-sm">In Stock</span>
+                            <div class="text-6xl md:text-7xl drop-shadow-md group-hover:scale-110 group-hover:-rotate-6 transition-transform">🥫</div>
+                        </div>
+                        <div class="p-4 md:p-5 flex flex-col flex-1">
+                            <h4 class="font-black text-slate-800 text-sm md:text-base leading-tight mb-1">Canned Goods Pack</h4>
+                            <p class="text-[10px] md:text-xs text-slate-500 font-medium mb-4" data-en="Assorted 3pcs" data-ceb="Sari-sari 3pcs">Assorted 3pcs</p>
+                            <div class="mt-auto">
+                                <button onclick="redeemItem('Canned Goods Pack', 30)" class="w-full bg-orange-50 text-orange-600 font-black py-2.5 rounded-xl border border-orange-200 group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-amber-500 group-hover:text-white group-hover:border-transparent transition-all active:scale-95 text-xs flex items-center justify-center gap-1.5"><span class="material-symbols-outlined text-[16px]">local_activity</span> 30 Pts</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Eggs -->
+                    <div class="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-xl hover:-translate-y-1 transition-all overflow-hidden border border-slate-100 flex flex-col group cursor-pointer">
+                        <div class="h-32 md:h-40 w-full relative overflow-hidden bg-slate-100">
+                            <img src="https://images.unsplash.com/photo-1587486913049-53fc88980cfc?auto=format&fit=crop&w=600&q=80" alt="Eggs" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        </div>
+                        <div class="p-4 md:p-5 flex flex-col flex-1">
+                            <h4 class="font-black text-slate-800 text-sm md:text-base leading-tight mb-1">1 Dozen Eggs</h4>
+                            <p class="text-[10px] md:text-xs text-slate-500 font-medium mb-4" data-en="Fresh & Local" data-ceb="Presko ug Lokal">Fresh & Local</p>
+                            <div class="mt-auto">
+                                <button onclick="redeemItem('1 Dozen Eggs', 45)" class="w-full bg-orange-50 text-orange-600 font-black py-2.5 rounded-xl border border-orange-200 group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-amber-500 group-hover:text-white group-hover:border-transparent transition-all active:scale-95 text-xs flex items-center justify-center gap-1.5"><span class="material-symbols-outlined text-[16px]">local_activity</span> 45 Pts</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cooking Oil -->
+                    <div class="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-xl hover:-translate-y-1 transition-all overflow-hidden border border-slate-100 flex flex-col group cursor-pointer">
+                        <div class="h-32 md:h-40 w-full relative overflow-hidden bg-slate-100">
+                            <img src="https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=600&q=80" alt="Oil" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        </div>
+                        <div class="p-4 md:p-5 flex flex-col flex-1">
+                            <h4 class="font-black text-slate-800 text-sm md:text-base leading-tight mb-1">Cooking Oil</h4>
+                            <p class="text-[10px] md:text-xs text-slate-500 font-medium mb-4" data-en="500ml Bottle" data-ceb="500ml nga Botelya">500ml Bottle</p>
+                            <div class="mt-auto">
+                                <button onclick="redeemItem('Cooking Oil', 40)" class="w-full bg-orange-50 text-orange-600 font-black py-2.5 rounded-xl border border-orange-200 group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-amber-500 group-hover:text-white group-hover:border-transparent transition-all active:scale-95 text-xs flex items-center justify-center gap-1.5"><span class="material-symbols-outlined text-[16px]">local_activity</span> 40 Pts</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Med Kit (EMOJI) -->
+                    <div class="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-xl hover:-translate-y-1 transition-all overflow-hidden border border-slate-100 flex flex-col group cursor-pointer">
+                        <div class="h-32 md:h-40 w-full relative overflow-hidden bg-slate-50 flex items-center justify-center">
+                            <div class="text-6xl md:text-7xl drop-shadow-md group-hover:scale-110 group-hover:rotate-6 transition-transform">💊</div>
+                        </div>
+                        <div class="p-4 md:p-5 flex flex-col flex-1">
+                            <h4 class="font-black text-slate-800 text-sm md:text-base leading-tight mb-1">Basic Med Kit</h4>
+                            <p class="text-[10px] md:text-xs text-slate-500 font-medium mb-4" data-en="Paracetamol & Vits" data-ceb="Tambal ug Vits">Paracetamol & Vits</p>
+                            <div class="mt-auto">
+                                <button onclick="redeemItem('Basic Med Kit', 35)" class="w-full bg-orange-50 text-orange-600 font-black py-2.5 rounded-xl border border-orange-200 group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-amber-500 group-hover:text-white group-hover:border-transparent transition-all active:scale-95 text-xs flex items-center justify-center gap-1.5"><span class="material-symbols-outlined text-[16px]">local_activity</span> 35 Pts</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Eco Bag -->
+                    <div class="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-xl hover:-translate-y-1 transition-all overflow-hidden border border-slate-100 flex flex-col group cursor-pointer">
+                        <div class="h-32 md:h-40 w-full relative overflow-hidden bg-slate-100">
+                            <img src="https://images.unsplash.com/photo-1597348989645-46b190ce4918?auto=format&fit=crop&w=600&q=80" alt="Eco Bag" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        </div>
+                        <div class="p-4 md:p-5 flex flex-col flex-1">
+                            <h4 class="font-black text-slate-800 text-sm md:text-base leading-tight mb-1">Eco-Bag</h4>
+                            <p class="text-[10px] md:text-xs text-slate-500 font-medium mb-4" data-en="Reusable Tote" data-ceb="Pwedeng magamit usab">Reusable Tote</p>
+                            <div class="mt-auto">
+                                <button onclick="redeemItem('Eco-Bag', 20)" class="w-full bg-orange-50 text-orange-600 font-black py-2.5 rounded-xl border border-orange-200 group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-amber-500 group-hover:text-white group-hover:border-transparent transition-all active:scale-95 text-xs flex items-center justify-center gap-1.5"><span class="material-symbols-outlined text-[16px]">local_activity</span> 20 Pts</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- T-Shirt -->
+                    <div class="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-xl hover:-translate-y-1 transition-all overflow-hidden border border-slate-100 flex flex-col group cursor-pointer">
+                        <div class="h-32 md:h-40 w-full relative overflow-hidden bg-slate-100">
+                            <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=600&q=80" alt="Shirt" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                        </div>
+                        <div class="p-4 md:p-5 flex flex-col flex-1">
+                            <h4 class="font-black text-slate-800 text-sm md:text-base leading-tight mb-1">Bayanihan Shirt</h4>
+                            <p class="text-[10px] md:text-xs text-slate-500 font-medium mb-4" data-en="Official Supporter" data-ceb="Opisyal nga Sanina">Official Supporter</p>
+                            <div class="mt-auto">
+                                <button onclick="redeemItem('Bayanihan T-Shirt', 150)" class="w-full bg-orange-50 text-orange-600 font-black py-2.5 rounded-xl border border-orange-200 group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-amber-500 group-hover:text-white group-hover:border-transparent transition-all active:scale-95 text-xs flex items-center justify-center gap-1.5"><span class="material-symbols-outlined text-[16px]">local_activity</span> 150 Pts</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Premium GCash Load -->
+                    <div class="bg-gradient-to-b from-blue-500 to-indigo-600 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.1)] hover:shadow-2xl hover:-translate-y-1 transition-all overflow-hidden border border-blue-400 flex flex-col group cursor-pointer relative">
+                        <div class="h-32 md:h-40 w-full relative overflow-hidden bg-indigo-900 flex items-center justify-center">
+                            <span class="absolute top-3 right-3 bg-yellow-400 text-slate-900 text-[9px] font-black px-2.5 py-1 rounded-lg uppercase tracking-wider z-10 shadow-sm animate-pulse">Premium!</span>
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/GCash_logo.svg/512px-GCash_logo.svg.png" alt="GCash" class="w-2/3 h-2/3 object-contain group-hover:scale-110 transition-transform duration-500 drop-shadow-sm">
+                        </div>
+                        <div class="p-4 md:p-5 flex flex-col flex-1 bg-gradient-to-b from-white to-blue-50">
+                            <h4 class="font-black text-blue-900 text-sm md:text-base leading-tight mb-1">₱50 GCash/Load</h4>
+                            <p class="text-[10px] md:text-xs text-blue-600 font-medium mb-4" data-en="Sent to your number" data-ceb="Ipadala sa imong numero">Sent to your number</p>
+                            <div class="mt-auto">
+                                <button onclick="redeemItem('P50 GCash/Load', 200)" class="w-full bg-blue-600 text-white font-black py-2.5 rounded-xl shadow-md hover:bg-blue-700 transition-all active:scale-95 text-xs flex items-center justify-center gap-1.5"><span class="material-symbols-outlined text-[16px]">local_activity</span> 200 Pts</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
 
-            <!-- MAP SECTION -->
-            <div class="mb-10 animate-fade" style="animation-delay: 0.1s;">
-                <div class="flex items-center justify-between mb-6 px-2">
-                    <h3 class="text-2xl font-black text-slate-800 tracking-tight" data-en="Live Community Map" data-ceb="Aktibong Mapa sa Komunidad">Live Community Map</h3>
-                </div>
-                <div class="bg-white rounded-[2rem] p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 h-[450px] overflow-hidden z-0 relative">
-                    <div id="map" class="w-full h-full rounded-[1.5rem] z-0"></div>
-                </div>
-            </div>
-
-            <!-- STATS CARDS -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12 animate-fade" style="animation-delay: 0.2s;">
-                <div class="bg-white p-7 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex items-center gap-6 hover:-translate-y-1 transition-transform">
-                    <div class="w-16 h-16 rounded-2xl bg-slate-50 border border-slate-100 text-slate-500 flex items-center justify-center shadow-inner"><span class="material-symbols-outlined text-3xl">folder_open</span></div>
-                    <div><p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1" data-en="Total Reports" data-ceb="Tanan Report">Total Reports</p><p class="text-4xl font-black text-slate-800" id="stat-total">0</p></div>
-                </div>
-                <div class="bg-white p-7 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex items-center gap-6 hover:-translate-y-1 transition-transform">
-                    <div class="w-16 h-16 rounded-2xl bg-orange-50 border border-orange-100 text-orange-500 flex items-center justify-center shadow-inner"><span class="material-symbols-outlined text-3xl">pending_actions</span></div>
-                    <div><p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1" data-en="In Progress" data-ceb="Gi-aksyunan">In Progress</p><p class="text-4xl font-black text-slate-800" id="stat-pending">0</p></div>
-                </div>
-                <div class="bg-white p-7 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex items-center gap-6 hover:-translate-y-1 transition-transform">
-                    <div class="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-500 flex items-center justify-center shadow-inner"><span class="material-symbols-outlined text-3xl">task_alt</span></div>
-                    <div><p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1" data-en="Resolved" data-ceb="Nasulbad">Resolved</p><p class="text-4xl font-black text-slate-800" id="stat-resolved">0</p></div>
-                </div>
-            </div>
-
-            <!-- RECENT REPORTS -->
-            <div class="animate-fade" style="animation-delay: 0.3s;">
-                <h3 class="text-2xl font-black text-slate-800 mb-6 px-2 tracking-tight" data-en="Recent Reports" data-ceb="Bag-ong Reports">Recent Reports</h3>
-                <div class="bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden" id="recentReportsList">
-                    <div class="p-10 text-center text-slate-400 text-sm font-semibold">Loading...</div>
-                </div>
-            </div>
         </div>
     </main>
 
-    <!-- ─── SARI-SARI STORE / REWARDS MODAL ─── -->
-    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] hidden flex items-center justify-center p-4 transition-all" id="rewardsModal">
-        <div class="bg-white rounded-[2rem] w-full max-w-2xl shadow-2xl overflow-hidden animate-fade flex flex-col max-h-[90vh] border-[4px] border-amber-700/10">
-            <!-- Store Header (Wood & Banderitas Vibe) -->
-            <div class="relative p-8 flex justify-between items-center bg-gradient-to-b from-orange-200 to-amber-100 overflow-hidden border-b-[6px] border-amber-800/20">
-                <div class="absolute top-[-10px] left-0 w-full text-3xl tracking-[0.5em] opacity-80 whitespace-nowrap">
-                    <span class="banderitas" style="animation-delay: 0s;">🎏</span>
-                    <span class="banderitas" style="animation-delay: 0.2s;">🎏</span>
-                    <span class="banderitas" style="animation-delay: 0.4s;">🎏</span>
-                    <span class="banderitas" style="animation-delay: 0.1s;">🎏</span>
-                    <span class="banderitas" style="animation-delay: 0.3s;">🎏</span>
-                    <span class="banderitas" style="animation-delay: 0.5s;">🎏</span>
-                    <span class="banderitas" style="animation-delay: 0.2s;">🎏</span>
-                </div>
-                <div class="relative z-10 mt-3">
-                    <h3 class="text-3xl font-black text-amber-900 flex items-center gap-2 drop-shadow-sm font-serif">
-                        <span class="material-symbols-outlined text-4xl text-orange-600">storefront</span> Bayanihan Sari-Sari
-                    </h3>
-                    <div class="inline-flex items-center mt-2 bg-amber-900/10 px-3 py-1 rounded-lg border border-amber-900/20">
-                        <p class="text-amber-900 font-bold text-sm" data-en="Your Points:" data-ceb="Imong Puntos:">Your Points:</p>
-                        <span class="font-black ml-2 text-orange-700 text-lg">{{ user['hero_points'] }}</span>
-                    </div>
-                </div>
-                <button onclick="document.getElementById('rewardsModal').classList.add('hidden')" class="relative z-10 w-10 h-10 rounded-full bg-white/50 backdrop-blur flex items-center justify-center text-amber-900 hover:text-white hover:bg-rose-500 transition-all shadow-sm">
-                    <span class="material-symbols-outlined">close</span>
+    <!-- ─── SETTINGS MODAL ─── -->
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex items-end md:items-center justify-center p-0 md:p-4 transition-all" id="settingsModal">
+        <div class="bg-white rounded-t-[2rem] md:rounded-[2.5rem] w-full max-w-md shadow-2xl overflow-hidden animate-fade border border-slate-100 flex flex-col max-h-[90vh]">
+            <div class="p-5 md:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
+                <h3 class="text-lg md:text-xl font-black text-slate-800 flex items-center gap-2 tracking-tight">
+                    <span class="material-symbols-outlined text-violet-600">manage_accounts</span>
+                    <span data-en="Account Settings" data-ceb="Mga Setting sa Akawnt">Account Settings</span>
+                </h3>
+                <button onclick="document.getElementById('settingsModal').classList.add('hidden')" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors shadow-sm border border-slate-200 active:scale-95">
+                    <span class="material-symbols-outlined text-[18px] md:text-[24px]">close</span>
                 </button>
             </div>
             
-            <!-- Store Shelves -->
-            <div class="p-8 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-5 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] bg-amber-50/90">
-                <div class="bg-white/90 backdrop-blur-sm border-[3px] border-amber-200 p-6 rounded-[2rem] flex flex-col items-center text-center shadow-md hover:shadow-xl hover:-translate-y-1 transition-all relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-xl uppercase tracking-wider">Sulit!</div>
-                    <div class="text-6xl mb-3 drop-shadow-md group-hover:scale-110 transition-transform">🍚</div>
-                    <h4 class="font-black text-amber-950 text-xl">1 Kilo Bigas</h4>
-                    <p class="text-xs text-amber-700/80 mb-5 font-bold">Claim at Brgy Hall</p>
-                    <button onclick="redeemItem('1 Kilo Bigas', 50)" class="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white font-black py-3 rounded-xl shadow-md hover:from-orange-600 hover:to-amber-600 transition-all active:scale-95">Palitin - 50 Pts</button>
+            <div class="p-6 md:p-8 space-y-6 overflow-y-auto" style="-webkit-overflow-scrolling: touch;">
+                <div>
+                    <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3" data-en="Personal Info" data-ceb="Personal nga Impormasyon">Personal Info</h4>
+                    <div class="space-y-3">
+                        <input type="text" value="{{ user['full_name'] }}" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:border-violet-500 outline-none" placeholder="Full Name">
+                        <input type="email" value="{{ user['email'] }}" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-400 bg-slate-50 outline-none cursor-not-allowed" readonly>
+                        <input type="text" value="{{ user['phone_number'] }}" class="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:border-violet-500 outline-none" placeholder="Phone Number">
+                    </div>
                 </div>
-                <div class="bg-white/90 backdrop-blur-sm border-[3px] border-amber-200 p-6 rounded-[2rem] flex flex-col items-center text-center shadow-md hover:shadow-xl hover:-translate-y-1 transition-all group">
-                    <div class="text-6xl mb-3 drop-shadow-md group-hover:scale-110 transition-transform">🥫</div>
-                    <h4 class="font-black text-amber-950 text-xl">Canned Goods Pack</h4>
-                    <p class="text-xs text-amber-700/80 mb-5 font-bold">Assorted 3pcs</p>
-                    <button onclick="redeemItem('Canned Goods Pack', 30)" class="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white font-black py-3 rounded-xl shadow-md hover:from-orange-600 hover:to-amber-600 transition-all active:scale-95">Palitin - 30 Pts</button>
+
+                <div>
+                    <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3" data-en="Preferences" data-ceb="Pina-angayan">Preferences</h4>
+                    <label class="flex items-center justify-between p-4 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm" data-en="SMS Notifications" data-ceb="Pahibalo sa SMS">SMS Notifications</p>
+                            <p class="text-[10px] text-slate-500" data-en="Get alerts when report is resolved" data-ceb="Pahibalo kon masulbad ang report">Get alerts when report is resolved</p>
+                        </div>
+                        <input type="checkbox" checked class="w-5 h-5 accent-violet-600 rounded">
+                    </label>
                 </div>
-                <div class="bg-white/90 backdrop-blur-sm border-[3px] border-amber-200 p-6 rounded-[2rem] flex flex-col items-center text-center shadow-md hover:shadow-xl hover:-translate-y-1 transition-all group">
-                    <div class="text-6xl mb-3 drop-shadow-md group-hover:scale-110 transition-transform">💊</div>
-                    <h4 class="font-black text-amber-950 text-xl">Basic Med Kit</h4>
-                    <p class="text-xs text-amber-700/80 mb-5 font-bold">Paracetamol & Vits</p>
-                    <button onclick="redeemItem('Basic Med Kit', 40)" class="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white font-black py-3 rounded-xl shadow-md hover:from-orange-600 hover:to-amber-600 transition-all active:scale-95">Palitin - 40 Pts</button>
-                </div>
-                <div class="bg-white/90 backdrop-blur-sm border-[3px] border-amber-200 p-6 rounded-[2rem] flex flex-col items-center text-center shadow-md hover:shadow-xl hover:-translate-y-1 transition-all group">
-                    <div class="text-6xl mb-3 drop-shadow-md group-hover:scale-110 transition-transform">👕</div>
-                    <h4 class="font-black text-amber-950 text-xl">Bayanihan Shirt</h4>
-                    <p class="text-xs text-amber-700/80 mb-5 font-bold">Official Supporter</p>
-                    <button onclick="redeemItem('Bayanihan T-Shirt', 150)" class="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white font-black py-3 rounded-xl shadow-md hover:from-orange-600 hover:to-amber-600 transition-all active:scale-95">Palitin - 150 Pts</button>
-                </div>
+
+                <button onclick="saveSettings()" class="w-full bg-slate-900 text-white font-black text-base py-3.5 rounded-xl shadow-lg hover:bg-slate-800 active:scale-95 transition-all">
+                    <span data-en="Save Changes" data-ceb="I-save">Save Changes</span>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- ─── REPORT MODAL WITH PHOTO/GPS ─── -->
-    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4 transition-all" id="reportModal">
-        <div class="bg-white rounded-[2rem] w-full max-w-xl shadow-2xl overflow-hidden animate-fade border border-slate-100 flex flex-col max-h-[95vh]">
-            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
-                <h3 class="text-xl font-black text-slate-800 flex items-center gap-2 tracking-tight">
-                    <span class="material-symbols-outlined text-violet-600">add_a_photo</span>
-                    <span data-en="New Report" data-ceb="Bag-ong Report">New Report</span>
+    <!-- ─── BUG REPORT MODAL (NEW) ─── -->
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex items-end md:items-center justify-center p-0 md:p-4 transition-all" id="bugReportModal">
+        <div class="bg-white rounded-t-[2rem] md:rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden animate-fade border border-slate-100 flex flex-col max-h-[90vh]">
+            <div class="p-5 md:p-6 border-b border-slate-100 flex justify-between items-center bg-rose-50/50 shrink-0">
+                <h3 class="text-lg md:text-xl font-black text-slate-800 flex items-center gap-2 tracking-tight">
+                    <span class="material-symbols-outlined text-rose-500">bug_report</span>
+                    <span data-en="Report System Bug" data-ceb="I-report ang Bug">Report System Bug</span>
                 </h3>
-                <button onclick="document.getElementById('reportModal').classList.add('hidden')" class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors shadow-sm">
-                    <span class="material-symbols-outlined">close</span>
+                <button onclick="closeBugReport()" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors shadow-sm border border-slate-200 active:scale-95">
+                    <span class="material-symbols-outlined text-[18px] md:text-[24px]">close</span>
                 </button>
             </div>
             
-            <form id="reportForm" onsubmit="submitReport(event)" class="p-8 space-y-5 overflow-y-auto">
-                <!-- PHOTO SELECTION BUTTONS -->
+            <form onsubmit="submitBugReport(event)" class="p-6 md:p-8 space-y-5 overflow-y-auto" style="-webkit-overflow-scrolling: touch;">
                 <div>
-                    <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest" data-en="Evidence Photo" data-ceb="Litrato sa Problema">Evidence Photo</label>
+                    <label class="text-[10px] md:text-[11px] font-extrabold text-slate-400 uppercase tracking-widest" data-en="Issue Description" data-ceb="Deskripsyon sa Isyu">Issue Description</label>
+                    <textarea id="bugDescription" rows="4" class="w-full mt-2 border border-slate-200 rounded-xl px-4 py-3 text-sm md:text-base text-slate-700 focus:border-rose-500 focus:ring-2 focus:ring-rose-500/20 bg-white outline-none transition-all font-medium resize-none shadow-sm" placeholder="Please describe what went wrong..." required></textarea>
+                </div>
+
+                <div>
+                    <label class="text-[10px] md:text-[11px] font-extrabold text-slate-400 uppercase tracking-widest" data-en="Attach Screenshot (Optional)" data-ceb="I-apil ang Screenshot (Opsyonal)">Attach Screenshot (Optional)</label>
+                    <input type="file" id="bugScreenshot" accept="image/*" class="w-full mt-2 text-xs md:text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-rose-50 file:text-rose-600 hover:file:bg-rose-100 cursor-pointer transition-all">
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 flex gap-3 items-center">
+                    <span class="material-symbols-outlined text-slate-400">mail</span>
+                    <p class="text-xs text-slate-500 font-medium leading-tight">This will be sent directly to the tech team at <strong class="text-slate-700">admin.bayanihanhub@cebu.gov.ph</strong></p>
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-rose-500 to-red-600 text-white font-black text-base md:text-lg py-4 rounded-xl shadow-lg shadow-rose-500/30 hover:shadow-xl hover:shadow-rose-500/40 hover:-translate-y-0.5 active:scale-95 transition-all mt-4 flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">send</span> <span data-en="Send Bug Report" data-ceb="Ipadala ang Bug">Send Bug Report</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ─── REPORT MODAL ─── -->
+    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] hidden flex items-end md:items-center justify-center p-0 md:p-4 transition-all" id="reportModal">
+        <div class="bg-white rounded-t-[2rem] md:rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden animate-fade border border-slate-100 flex flex-col max-h-[90vh]">
+            <div class="p-5 md:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
+                <h3 class="text-lg md:text-xl font-black text-slate-800 flex items-center gap-2 tracking-tight">
+                    <span class="material-symbols-outlined text-violet-600">add_a_photo</span>
+                    <span data-en="New Report" data-ceb="Bag-ong Report">New Report</span>
+                </h3>
+                <button onclick="document.getElementById('reportModal').classList.add('hidden')" class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-white flex items-center justify-center text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-colors shadow-sm border border-slate-200 active:scale-95">
+                    <span class="material-symbols-outlined text-[18px] md:text-[24px]">close</span>
+                </button>
+            </div>
+            
+            <form id="reportForm" onsubmit="submitReport(event)" class="p-6 md:p-8 space-y-5 overflow-y-auto" style="-webkit-overflow-scrolling: touch;">
+                <div>
+                    <label class="text-[10px] md:text-[11px] font-extrabold text-slate-400 uppercase tracking-widest" data-en="Evidence Photo" data-ceb="Litrato sa Problema">Evidence Photo</label>
                     <div class="flex gap-3 mt-2">
-                        <button type="button" onclick="triggerCamera()" class="flex-1 bg-violet-100 text-violet-700 hover:bg-violet-600 hover:text-white border border-violet-200 py-3 rounded-xl font-bold transition-all flex flex-col items-center justify-center gap-1 shadow-sm active:scale-95">
-                            <span class="material-symbols-outlined text-2xl">photo_camera</span>
-                            <span class="text-xs" data-en="Live Photo (Auto GPS)" data-ceb="Live Photo (Auto GPS)">Live Photo (Auto GPS)</span>
+                        <button type="button" onclick="triggerCamera()" class="flex-1 bg-violet-50 text-violet-700 hover:bg-violet-600 hover:text-white border border-violet-200 py-3 md:py-4 rounded-xl font-bold transition-all flex flex-col items-center justify-center gap-1 shadow-sm active:scale-95 group">
+                            <span class="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">photo_camera</span>
+                            <span class="text-[10px] md:text-xs" data-en="Live Photo" data-ceb="Live Photo">Live Photo</span>
                         </button>
-                        <button type="button" onclick="triggerUpload()" class="flex-1 bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200 py-3 rounded-xl font-bold transition-all flex flex-col items-center justify-center gap-1 shadow-sm active:scale-95">
-                            <span class="material-symbols-outlined text-2xl">folder_open</span>
-                            <span class="text-xs" data-en="Upload Gallery" data-ceb="Upload sa Gallery">Upload Gallery</span>
+                        <button type="button" onclick="triggerUpload()" class="flex-1 bg-slate-50 text-slate-600 hover:bg-slate-800 hover:text-white border border-slate-200 py-3 md:py-4 rounded-xl font-bold transition-all flex flex-col items-center justify-center gap-1 shadow-sm active:scale-95 group">
+                            <span class="material-symbols-outlined text-2xl group-hover:scale-110 transition-transform">folder_open</span>
+                            <span class="text-[10px] md:text-xs" data-en="Gallery" data-ceb="Gallery">Gallery</span>
                         </button>
                     </div>
-                    
-                    <!-- HIDDEN FILE INPUTS -->
                     <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handleImage(event)">
                     <input type="file" id="uploadInput" accept="image/*" class="hidden" onchange="handleImage(event)">
                     
-                    <!-- IMAGE PREVIEW -->
-                    <div id="imagePreviewContainer" class="hidden mt-4 relative">
-                        <img id="imagePreview" src="" class="w-full h-40 object-cover rounded-2xl border-2 border-slate-200 shadow-sm">
-                        <button type="button" onclick="removeImage()" class="absolute top-2 right-2 bg-slate-900/70 text-white p-1 rounded-full hover:bg-rose-500 backdrop-blur-sm transition-colors">
-                            <span class="material-symbols-outlined text-sm">close</span>
+                    <div id="imagePreviewContainer" class="hidden mt-4 relative animate-fade">
+                        <img id="imagePreview" src="" class="w-full h-32 md:h-48 object-cover rounded-[1.5rem] border-[3px] border-violet-100 shadow-sm">
+                        <button type="button" onclick="removeImage()" class="absolute top-3 right-3 w-8 h-8 bg-slate-900/70 text-white rounded-full flex items-center justify-center hover:bg-rose-500 backdrop-blur-md transition-colors shadow-lg active:scale-95">
+                            <span class="material-symbols-outlined text-[16px]">close</span>
                         </button>
                     </div>
                 </div>
 
                 <div>
-                    <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest" data-en="Category" data-ceb="Kategorya">Category</label>
-                    <select id="reportCategory" class="w-full mt-2 border border-slate-200 rounded-2xl px-4 py-3.5 text-slate-700 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 bg-slate-50 outline-none transition-all font-medium" required>
+                    <label class="text-[10px] md:text-[11px] font-extrabold text-slate-400 uppercase tracking-widest" data-en="Category" data-ceb="Kategorya">Category</label>
+                    <select id="reportCategory" class="w-full mt-2 border border-slate-200 rounded-xl px-4 py-3 text-sm md:text-base text-slate-700 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 bg-white outline-none transition-all font-bold shadow-sm" required>
                         <option value="" disabled selected data-en="Select an issue type..." data-ceb="Pagpili og klase...">Select an issue type...</option>
                         <option value="Infrastructure">Infrastructure (Pothole, Broken Lights)</option>
                         <option value="Sanitation">Sanitation (Uncollected Garbage, Drainage)</option>
@@ -253,45 +530,112 @@
                         <option value="Environment">Environment (Flooding, Fallen Trees)</option>
                     </select>
                 </div>
+
                 <div>
-                    <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest flex justify-between" data-en="Exact Location" data-ceb="Lokasyon">
-                        <span>Location</span>
-                        <span id="gpsStatus" class="text-violet-500 hidden items-center gap-1"><span class="material-symbols-outlined text-[12px] animate-pulse">my_location</span> GPS Acquired</span>
+                    <!-- FLEXIBLE LOCATION INPUT -->
+                    <label class="text-[10px] md:text-[11px] font-extrabold text-slate-400 uppercase tracking-widest flex justify-between">
+                        <span data-en="Location" data-ceb="Lokasyon">Location</span>
+                        <span id="gpsStatus" class="text-violet-600 hidden items-center gap-1 font-black bg-violet-100 px-2 py-0.5 rounded-md border border-violet-200"><span class="material-symbols-outlined text-[12px] animate-pulse">my_location</span> Auto GPS</span>
                     </label>
-                    <input type="text" id="reportLocation" class="w-full mt-2 border border-slate-200 rounded-2xl px-4 py-3.5 text-slate-700 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 bg-slate-50 outline-none transition-all font-medium" placeholder="Manual address or Auto-GPS" required>
+                    <div class="relative mt-2">
+                        <input type="text" id="reportLocation" class="w-full border border-slate-200 rounded-xl pl-4 pr-12 py-3 text-sm md:text-base text-slate-700 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 bg-white outline-none transition-all font-bold shadow-sm" placeholder="Type address or tap icon ->" required>
+                        <button type="button" onclick="getLocationDirectly()" class="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 bg-violet-50 text-violet-600 rounded-lg flex items-center justify-center hover:bg-violet-600 hover:text-white transition-colors border border-violet-100 active:scale-95" title="Auto-Detect Location">
+                            <span class="material-symbols-outlined text-[20px]">my_location</span>
+                        </button>
+                    </div>
                 </div>
+
                 <div>
-                    <label class="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest" data-en="Description" data-ceb="Deskripsyon">Description</label>
-                    <textarea id="reportDescription" rows="2" class="w-full mt-2 border border-slate-200 rounded-2xl px-4 py-3.5 text-slate-700 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 bg-slate-50 outline-none transition-all font-medium resize-none" placeholder="Details..." required></textarea>
+                    <label class="text-[10px] md:text-[11px] font-extrabold text-slate-400 uppercase tracking-widest" data-en="Description" data-ceb="Deskripsyon">Description</label>
+                    <textarea id="reportDescription" rows="2" class="w-full mt-2 border border-slate-200 rounded-xl px-4 py-3 text-sm md:text-base text-slate-700 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 bg-white outline-none transition-all font-bold resize-none shadow-sm" placeholder="Details..." required></textarea>
                 </div>
-                <button type="submit" class="w-full bg-violet-600 text-white font-extrabold text-lg py-4 rounded-2xl shadow-lg shadow-violet-600/30 hover:bg-violet-700 active:scale-95 transition-all mt-2 flex items-center justify-center gap-2">
+
+                <button type="submit" class="w-full bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white font-black text-base md:text-lg py-4 rounded-xl shadow-lg shadow-violet-600/30 hover:shadow-xl hover:shadow-violet-600/40 hover:-translate-y-0.5 active:scale-95 transition-all mt-4 flex items-center justify-center gap-2">
                     <span class="material-symbols-outlined">send</span> <span data-en="Submit Report" data-ceb="Ipadala ang Report">Submit Report</span>
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- ─── TOAST NOTIFICATION ─── -->
-    <div id="toast" class="fixed top-6 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-6 py-3.5 rounded-full font-bold shadow-2xl opacity-0 pointer-events-none transition-all duration-300 z-[200] flex items-center gap-3 border border-slate-700">
-        <span class="material-symbols-outlined text-violet-400">info</span>
-        <span id="toastMsg" class="text-sm">Message</span>
+    <!-- ─── TICKET MODAL ─── -->
+    <div class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[200] hidden flex items-center justify-center p-4 transition-all" id="ticketModal">
+        <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden animate-fade border border-slate-100 flex flex-col text-center relative">
+            <div class="bg-gradient-to-br from-amber-400 to-orange-500 p-6 text-white pb-10">
+                <span class="material-symbols-outlined text-5xl mb-2">check_circle</span>
+                <h3 class="text-2xl font-black">Redeem Success!</h3>
+                <p class="text-sm font-medium opacity-90">Please present this to the Brgy Hall</p>
+            </div>
+            <div class="bg-white mx-6 -mt-6 rounded-2xl shadow-lg p-5 flex flex-col items-center border border-slate-100 border-dashed relative z-10">
+                <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mb-1">Item Claimed</p>
+                <h4 class="text-lg font-black text-slate-800 mb-4" id="ticketItemName">Item Name</h4>
+                <div class="w-full h-12 flex justify-center gap-0.5 mb-2 opacity-50">
+                    <div class="w-1 h-full bg-slate-800"></div><div class="w-2 h-full bg-slate-800"></div><div class="w-1 h-full bg-slate-800"></div><div class="w-3 h-full bg-slate-800"></div><div class="w-1 h-full bg-slate-800"></div><div class="w-2 h-full bg-slate-800"></div><div class="w-1 h-full bg-slate-800"></div><div class="w-4 h-full bg-slate-800"></div><div class="w-1 h-full bg-slate-800"></div><div class="w-2 h-full bg-slate-800"></div><div class="w-1 h-full bg-slate-800"></div><div class="w-3 h-full bg-slate-800"></div><div class="w-1 h-full bg-slate-800"></div><div class="w-2 h-full bg-slate-800"></div><div class="w-1 h-full bg-slate-800"></div><div class="w-3 h-full bg-slate-800"></div><div class="w-1 h-full bg-slate-800"></div><div class="w-2 h-full bg-slate-800"></div><div class="w-1 h-full bg-slate-800"></div>
+                </div>
+                <p class="text-xl font-black tracking-[0.2em] text-violet-700" id="ticketRefNo">REF-XXXXXX</p>
+            </div>
+            <div class="p-6">
+                <p class="text-xs text-slate-500 mb-4 font-medium">Take a screenshot of this ticket.</p>
+                <button onclick="window.location.reload()" class="w-full bg-slate-100 text-slate-700 font-black py-3 rounded-xl hover:bg-slate-200 transition-all active:scale-95">Close & Update Points</button>
+            </div>
+        </div>
     </div>
 
-    <!-- ─── LEAFLET JS & SCRIPTS ─── -->
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="fixed top-6 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-5 py-3 md:px-6 md:py-3.5 rounded-full font-bold shadow-2xl opacity-0 pointer-events-none transition-all duration-300 z-[200] flex items-center gap-3 border border-slate-700 w-max max-w-[90vw]">
+        <span class="material-symbols-outlined text-violet-400" id="toastIcon">info</span>
+        <span id="toastMsg" class="text-xs md:text-sm">Message</span>
+    </div>
+
+    <!-- SCRIPTS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // 1. TOAST
-        function showToast(msg, isError = false) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toastMsg').innerText = msg;
-            const icon = toast.querySelector('.material-symbols-outlined');
-            icon.innerText = isError ? 'error' : 'check_circle';
-            icon.className = `material-symbols-outlined ${isError ? 'text-rose-400' : 'text-emerald-400'}`;
-            toast.classList.remove('opacity-0', '-translate-y-5');
-            setTimeout(() => toast.classList.add('opacity-0', '-translate-y-5'), 4000);
+        const userFullName = "{{ user['full_name'] }}";
+        const userPoints = parseInt("{{ user['hero_points'] }}") || 0;
+        
+        function updateRank() {
+            const rankEl = document.getElementById('citizenRank');
+            const progEl = document.getElementById('rankProgress');
+            let rankName = "Active Citizen", icon = "local_police", pct = 0;
+            
+            if(userPoints >= 150) { rankName = "Bayani ng Bayan"; icon = "workspace_premium"; pct = 100; }
+            else if(userPoints >= 50) { rankName = "Barangay Defender"; icon = "verified"; pct = (userPoints/150)*100; }
+            else { pct = (userPoints/50)*100; }
+            
+            rankEl.innerHTML = `<span class="material-symbols-outlined text-xl md:text-2xl">${icon}</span> ${rankName}`;
+            progEl.style.width = `${Math.min(pct, 100)}%`;
+        }
+        updateRank();
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); document.getElementById('sidebarOverlay').classList.toggle('hidden'); }
+        function toggleProfileMenu() { document.getElementById('profileMenu').classList.toggle('hidden'); }
+        
+        function openSettings() { document.getElementById('settingsModal').classList.remove('hidden'); const pm = document.getElementById('profileMenu'); if(pm) pm.classList.add('hidden'); }
+        function saveSettings() { document.getElementById('settingsModal').classList.add('hidden'); showToast("Settings saved successfully!"); }
+        
+        // BUG REPORT LOGIC
+        function openBugReport() { 
+            document.getElementById('bugReportModal').classList.remove('hidden'); 
+            const pm = document.getElementById('profileMenu'); if(pm) pm.classList.add('hidden'); 
+        }
+        function closeBugReport() { document.getElementById('bugReportModal').classList.add('hidden'); }
+        function submitBugReport(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = `<span class="material-symbols-outlined animate-spin">refresh</span> Sending...`;
+            
+            // Simulating API call for hackathon
+            setTimeout(() => {
+                showToast("Bug report sent to admin.bayanihanhub@cebu.gov.ph!");
+                document.getElementById('bugDescription').value = '';
+                document.getElementById('bugScreenshot').value = '';
+                closeBugReport();
+                btn.innerHTML = originalHTML;
+            }, 1500);
         }
 
-        // 2. LANGUAGE TOGGLE
+        window.onclick = function(e) { if (!e.target.closest('.relative')) { const pm = document.getElementById('profileMenu'); if(pm) pm.classList.add('hidden'); } }
+
         let currentLang = 'en'; 
         function toggleLang() {
             currentLang = currentLang === 'en' ? 'ceb' : 'en';
@@ -303,51 +647,71 @@
             });
         }
 
-        // 3. PHOTO & GPS LOGIC
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            const icon = document.getElementById('toastIcon');
+            icon.innerText = isError ? 'error' : 'check_circle';
+            icon.className = `material-symbols-outlined ${isError ? 'text-rose-400' : 'text-emerald-400'}`;
+            toast.classList.remove('opacity-0', '-translate-y-5');
+            setTimeout(() => toast.classList.add('opacity-0', '-translate-y-5'), 3000);
+        }
+
+        function switchTab(tabName) {
+            if(window.innerWidth < 768) { document.getElementById('sidebar').classList.add('-translate-x-full'); document.getElementById('sidebarOverlay').classList.add('hidden'); }
+            ['dashboard', 'feed', 'store'].forEach(t => {
+                document.getElementById(`view-${t}`).classList.add('hidden');
+                const btn = document.getElementById(`tab-${t}`);
+                if(btn) btn.className = "w-full flex items-center gap-3.5 px-4 py-3.5 md:py-4 rounded-2xl font-bold text-sm border transition-all tab-inactive group active:scale-95";
+            });
+            document.getElementById(`view-${tabName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tabName}`);
+            if(activeBtn) activeBtn.className = "w-full flex items-center gap-3.5 px-4 py-3.5 md:py-4 rounded-2xl font-bold text-sm border transition-all tab-active group active:scale-95";
+            if(tabName === 'dashboard') { setTimeout(() => map.invalidateSize(), 100); } 
+            document.getElementById('mainScroll').scrollTo(0,0);
+            
+            let titles = {'dashboard': 'Home', 'feed': 'Community', 'store': 'Rewards'};
+            let cebTitles = {'dashboard': 'Panimalay', 'feed': 'Komunidad', 'store': 'Ganti'};
+            document.getElementById('headerTitle').innerText = currentLang === 'en' ? titles[tabName] : cebTitles[tabName];
+        }
+
+        function timeAgo(dateString) {
+            const date = new Date(dateString); const seconds = Math.round((new Date() - date) / 1000); const minutes = Math.round(seconds / 60);
+            const hours = Math.round(minutes / 60); const days = Math.round(hours / 24);
+            if (seconds < 60) return 'Just now'; if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`; if (days === 1) return 'Yesterday'; return `${days}d ago`;
+        }
+
+        // CAMERA, UPLOAD, AND LOCATION LOGIC (NO MORE READONLY LOCK)
         let base64Image = null;
 
-        function triggerCamera() {
-            document.getElementById('cameraInput').click();
-            // Trigger GPS Capture
+        function getLocationDirectly() {
             if (navigator.geolocation) {
                 const locInput = document.getElementById('reportLocation');
                 locInput.value = "Fetching GPS location...";
-                locInput.setAttribute('readonly', true);
-                locInput.classList.add('bg-slate-200', 'text-slate-500');
-                
                 navigator.geolocation.getCurrentPosition(async (pos) => {
-                    const lat = pos.coords.latitude;
-                    const lon = pos.coords.longitude;
+                    const lat = pos.coords.latitude; const lon = pos.coords.longitude;
                     try {
-                        // Free OpenStreetMap Reverse Geocoding API
                         const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
                         const data = await res.json();
                         locInput.value = data.display_name || `${lat}, ${lon}`;
-                        document.getElementById('gpsStatus').classList.remove('hidden');
-                        document.getElementById('gpsStatus').classList.add('flex');
-                    } catch (e) {
-                        locInput.value = `Lat: ${lat}, Lng: ${lon}`;
-                    }
-                }, () => {
-                    showToast("GPS Denied. Please type manually.", true);
-                    resetLocationField();
-                });
+                        document.getElementById('gpsStatus').classList.remove('hidden'); document.getElementById('gpsStatus').classList.add('flex');
+                    } catch (e) { locInput.value = `Lat: ${lat}, Lng: ${lon}`; }
+                }, () => { showToast("GPS Denied. Type manually.", true); locInput.value = ""; });
+            } else {
+                showToast("GPS not supported on this device.", true);
             }
         }
 
-        function triggerUpload() {
-            document.getElementById('uploadInput').click();
-            resetLocationField();
-            showToast("Please type the exact location manually.", false);
+        function triggerCamera() {
+            document.getElementById('cameraInput').click();
+            getLocationDirectly();
         }
 
-        function resetLocationField() {
-            const locInput = document.getElementById('reportLocation');
-            locInput.value = "";
-            locInput.removeAttribute('readonly');
-            locInput.classList.remove('bg-slate-200', 'text-slate-500');
-            document.getElementById('gpsStatus').classList.add('hidden');
-            document.getElementById('gpsStatus').classList.remove('flex');
+        function triggerUpload() { 
+            document.getElementById('uploadInput').click(); 
+            document.getElementById('gpsStatus').classList.add('hidden'); document.getElementById('gpsStatus').classList.remove('flex');
+            showToast("Please type or detect location.", false); 
         }
 
         function handleImage(event) {
@@ -355,117 +719,231 @@
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    base64Image = e.target.result;
-                    document.getElementById('imagePreview').src = base64Image;
-                    document.getElementById('imagePreviewContainer').classList.remove('hidden');
+                    const img = new Image(); img.src = e.target.result;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas'); const MAX_WIDTH = 800; const scaleSize = MAX_WIDTH / img.width;
+                        canvas.width = MAX_WIDTH; canvas.height = img.height * scaleSize;
+                        const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        base64Image = canvas.toDataURL('image/jpeg', 0.7);
+                        document.getElementById('imagePreview').src = base64Image; document.getElementById('imagePreviewContainer').classList.remove('hidden');
+                    }
                 }
                 reader.readAsDataURL(file);
             }
         }
 
         function removeImage() {
-            base64Image = null;
-            document.getElementById('imagePreviewContainer').classList.add('hidden');
-            document.getElementById('imagePreview').src = "";
-            document.getElementById('cameraInput').value = "";
-            document.getElementById('uploadInput').value = "";
+            base64Image = null; document.getElementById('imagePreviewContainer').classList.add('hidden');
+            document.getElementById('imagePreview').src = ""; document.getElementById('cameraInput').value = ""; document.getElementById('uploadInput').value = "";
         }
 
-        // 4. MAP & DATA FETCHING
+        let localState = JSON.parse(localStorage.getItem('bh_feed_state')) || {};
+        function saveLocalState() { localStorage.setItem('bh_feed_state', JSON.stringify(localState)); }
+
+        function toggleLike(reportId, btnElement) {
+            if (!localState[reportId]) localState[reportId] = { likes: Math.floor(Math.random() * 20) + 10, isLiked: false, comments: [] };
+            const icon = btnElement.querySelector('.material-symbols-outlined'); const countText = btnElement.querySelector('.like-count');
+            if(localState[reportId].isLiked) {
+                localState[reportId].likes -= 1; localState[reportId].isLiked = false;
+                icon.classList.remove('icon-filled', 'text-rose-500'); btnElement.classList.remove('text-rose-500');
+            } else {
+                localState[reportId].likes += 1; localState[reportId].isLiked = true;
+                icon.classList.add('icon-filled', 'text-rose-500'); btnElement.classList.add('text-rose-500');
+            }
+            countText.innerText = localState[reportId].likes; saveLocalState();
+        }
+
+        function toggleComments(reportId) { document.getElementById(`comments-section-${reportId}`).classList.toggle('hidden'); }
+
+        function addComment(e, reportId) {
+            e.preventDefault(); const input = document.getElementById(`comment-input-${reportId}`); const text = input.value.trim();
+            if(!text) return;
+            if (!localState[reportId]) localState[reportId] = { likes: 12, isLiked: false, comments: [] };
+            if (!localState[reportId].comments) localState[reportId].comments = [];
+            localState[reportId].comments.push({ name: userFullName, text: text, time: new Date().toISOString() });
+            saveLocalState(); input.value = ''; renderComments(reportId); showToast("Comment posted!");
+        }
+
+        function renderComments(reportId) {
+            const container = document.getElementById(`comments-list-${reportId}`);
+            const comments = (localState[reportId] && localState[reportId].comments) ? localState[reportId].comments : [];
+            if(comments.length === 0) { container.innerHTML = `<p class="text-xs text-slate-400 italic font-medium p-2">No comments yet. Be the first!</p>`; return; }
+            container.innerHTML = comments.map(c => `
+                <div class="flex gap-2.5 items-start mb-3 bg-white p-3 rounded-2xl border border-slate-100 shadow-sm">
+                    <div class="w-7 h-7 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center text-[10px] font-black shrink-0 border border-violet-200">${c.name.charAt(0).toUpperCase()}</div>
+                    <div><p class="text-xs font-black text-slate-800">${c.name}</p><p class="text-xs text-slate-600 font-medium leading-relaxed mt-0.5">${c.text}</p></div>
+                </div>
+            `).join('');
+            const countEl = document.getElementById(`comment-count-${reportId}`); if(countEl) countEl.innerText = `${comments.length} Comments`;
+        }
+
         const map = L.map('map').setView([10.3157, 123.8854], 14); 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19 }).addTo(map);
 
+        const dummyReports = [
+            {
+                report_id: 'dummy_1', category: 'Infrastructure', location: 'Gov. M. Cuenco Ave, Cebu City',
+                description: 'Malalim na lubak sa gitna ng kalsada, delikado sa mga motorista lalo na pag gabi. Sana maaksyunan agad bago may ma-aksidente.',
+                image_path: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?w=600&q=80',
+                status: 'In Progress', timestamp: new Date(Date.now() - 86400000).toISOString(), full_name: 'Juan Dela Cruz',
+                fake_comments: [{name: 'Kapitan', text: 'Noted ito Juan! Papupuntahin ko na ang engineering team bukas ng umaga.'}]
+            },
+            {
+                report_id: 'dummy_2', category: 'Sanitation', location: 'Colon Street corner Junquera',
+                description: '3 days na hindi nakukuha yung basura, umaamoy na po hanggang sa mga tindahan. Nananawagan po kami sa Brgy.',
+                image_path: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=600&q=80',
+                status: 'Resolved', timestamp: new Date(Date.now() - 172800000).toISOString(), full_name: 'Maria Clara',
+                fake_comments: [{name: 'Brgy Command Center', text: 'Nakuha na po ng garbage truck kaninang umaga. Salamat sa pag-report!'}]
+            },
+            {
+                report_id: 'dummy_3', category: 'Safety', location: 'Osmeña Blvd (Near USC)',
+                description: 'Pundido yung poste ng ilaw dito, medyo madilim at delikado sa mga estudyanteng umuuwi galing school.',
+                image_path: 'https://images.unsplash.com/photo-1514373941175-0a141072cb8c?w=600&q=80',
+                status: 'Pending', timestamp: new Date(Date.now() - 3600000).toISOString(), full_name: 'Pedro Penduko',
+                fake_comments: []
+            }
+        ];
+
         async function fetchReports() {
             try {
-                const res = await fetch('/api/get-reports');
-                const reports = await res.json();
+                let dbReports = [];
+                try {
+                    const res = await fetch('/api/get-reports');
+                    if(res.ok) {
+                        const data = await res.json();
+                        if(Array.isArray(data)) dbReports = data;
+                    }
+                } catch(e) { console.log("DB Fetch failed."); }
                 
-                document.getElementById('stat-total').innerText = reports.length;
-                document.getElementById('stat-pending').innerText = reports.filter(r => r.status === 'Pending').length;
-                document.getElementById('stat-resolved').innerText = reports.filter(r => r.status === 'Resolved').length;
-
-                const listContainer = document.getElementById('recentReportsList');
-                listContainer.innerHTML = '';
-
-                if(reports.length === 0) {
-                    listContainer.innerHTML = `<div class="p-10 text-center text-slate-400 font-medium">No reports yet.</div>`;
-                    return;
-                }
+                const reports = [...dbReports, ...dummyReports];
+                let pending = 0, resolved = 0;
+                const feedContainer = document.getElementById('feedListContainer');
+                feedContainer.innerHTML = '';
 
                 reports.forEach((report, i) => {
-                    const lat = 10.3157 + ((report.report_id * 0.003) % 0.03 - 0.015);
-                    const lng = 123.8854 + ((report.report_id * 0.004) % 0.03 - 0.015);
-                    L.marker([lat, lng]).bindPopup(`<div class="font-bold text-violet-800">${report.category}</div><div class="text-xs text-slate-600">${report.location}</div>`).addTo(map);
+                    if(report.status === 'Pending' || report.status === 'In Progress') pending++;
+                    if(report.status === 'Resolved') resolved++;
 
-                    if(i < 5) {
-                        const statusColor = report.status === 'Pending' ? 'text-orange-600 bg-orange-50 border-orange-100' : 'text-emerald-600 bg-emerald-50 border-emerald-100';
-                        const icon = report.status === 'Pending' ? 'engineering' : 'check_circle';
+                    if(report.status === 'Pending' && !report.report_id.toString().includes('dummy')) { return; }
+
+                    const rId = report.report_id;
+                    if (!localState[rId]) {
+                        localState[rId] = { likes: Math.floor(Math.random() * 40) + 5, isLiked: false, comments: report.fake_comments || [] };
+                    }
+                    saveLocalState();
+
+                    const lat = 10.3157 + ((report.report_id * 0.003 || 0) % 0.03 - 0.015);
+                    const lng = 123.8854 + ((report.report_id * 0.004 || 0) % 0.03 - 0.015);
+                    if (typeof report.report_id === 'number') {
+                        L.marker([lat, lng]).bindPopup(`<div class="font-bold text-violet-800">${report.category}</div><div class="text-xs text-slate-600">${report.location}</div>`).addTo(map);
+                    }
+
+                    if(i < 20) {
+                        let statusBadge = '';
+                        if(report.status === 'Resolved') statusBadge = `<span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-black uppercase flex items-center gap-1 border border-emerald-100"><span class="material-symbols-outlined text-[14px]">verified</span> Resolved</span>`;
+                        else if(report.status === 'In Progress') statusBadge = `<span class="bg-orange-50 text-orange-600 px-3 py-1 rounded-full text-[10px] font-black uppercase flex items-center gap-1 border border-orange-100"><span class="material-symbols-outlined text-[14px]">engineering</span> Fixing</span>`;
+                        else statusBadge = `<span class="bg-rose-50 text-rose-600 px-3 py-1 rounded-full text-[10px] font-black uppercase flex items-center gap-1 border border-rose-100"><span class="material-symbols-outlined text-[14px]">warning</span> Pending</span>`;
                         
-                        listContainer.innerHTML += `
-                        <div class="p-6 border-b border-slate-100 hover:bg-slate-50 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer group" onclick="map.setView([${lat}, ${lng}], 16);">
-                            <div class="flex items-center gap-5">
-                                <div class="w-12 h-12 rounded-2xl bg-violet-50 text-violet-600 flex items-center justify-center group-hover:scale-110 group-hover:bg-violet-600 group-hover:text-white transition-all shadow-sm">
-                                    <span class="material-symbols-outlined">pin_drop</span>
+                        const imgTag = report.image_path 
+                            ? `<img src="${report.image_path}" class="w-full h-56 object-cover border-y border-slate-100">`
+                            : `<div class="w-full h-40 bg-slate-50 border-y border-slate-100 flex items-center justify-center text-slate-300"><span class="material-symbols-outlined text-4xl">no_photography</span></div>`;
+
+                        const reporterName = report.full_name || 'Citizen';
+                        const initial = reporterName.charAt(0).toUpperCase();
+                        const state = localState[rId];
+                        const likeClass = state.isLiked ? 'text-rose-500' : 'text-slate-400 hover:text-rose-500';
+                        const heartIconClass = state.isLiked ? 'icon-filled text-rose-500' : '';
+
+                        feedContainer.innerHTML += `
+                            <div class="bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden flex flex-col h-max transition-all hover:shadow-lg">
+                                <div class="p-5 flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-slate-200 to-slate-300 text-slate-600 flex items-center justify-center font-black text-sm shadow-inner border border-white">${initial}</div>
+                                        <div>
+                                            <h4 class="font-bold text-slate-800 text-sm leading-tight">${reporterName}</h4>
+                                            <p class="text-[10px] text-slate-400 font-bold">${timeAgo(report.timestamp)} • ${report.location}</p>
+                                        </div>
+                                    </div>
+                                    ${statusBadge}
                                 </div>
-                                <div>
-                                    <h4 class="font-black text-slate-800 text-base group-hover:text-violet-700 transition-colors">${report.category}</h4>
-                                    <p class="text-xs text-slate-500 mt-0.5 font-medium line-clamp-1">${report.location}</p>
+                                <div class="px-5 pb-4">
+                                    <span class="text-[9px] font-black text-violet-600 bg-violet-50 px-2 py-0.5 rounded border border-violet-100 mb-2 inline-block uppercase tracking-wider">${report.category}</span>
+                                    <p class="text-sm text-slate-700 leading-relaxed font-medium">${report.description}</p>
+                                </div>
+                                ${imgTag}
+                                <div class="px-5 py-3 flex items-center gap-6 bg-slate-50/80 border-b border-slate-100">
+                                    <button onclick="toggleLike('${rId}', this)" class="flex items-center gap-1.5 transition-colors group ${likeClass}">
+                                        <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform ${heartIconClass}">favorite</span>
+                                        <span class="text-xs font-bold like-count">${state.likes}</span>
+                                    </button>
+                                    <button onclick="toggleComments('${rId}')" class="flex items-center gap-1.5 text-slate-500 hover:text-violet-600 transition-colors group">
+                                        <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">chat_bubble</span>
+                                        <span class="text-xs font-bold" id="comment-count-${rId}">${state.comments.length} Comments</span>
+                                    </button>
+                                    <button onclick="navigator.clipboard.writeText(window.location.href); showToast('Link copied to clipboard!')" class="flex items-center gap-1.5 text-slate-500 hover:text-emerald-500 transition-colors ml-auto group">
+                                        <span class="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform">share</span>
+                                    </button>
+                                </div>
+                                <div id="comments-section-${rId}" class="hidden bg-slate-50/50 px-5 py-5">
+                                    <div id="comments-list-${rId}" class="mb-4 max-h-48 overflow-y-auto pr-2" style="-webkit-overflow-scrolling: touch;"></div>
+                                    <form onsubmit="addComment(event, '${rId}')" class="flex gap-3 items-center">
+                                        <div class="w-8 h-8 rounded-full bg-violet-600 text-white flex items-center justify-center text-[10px] font-black shrink-0 shadow-sm">${userFullName.charAt(0).toUpperCase()}</div>
+                                        <input type="text" id="comment-input-${rId}" placeholder="Write a comment..." class="flex-1 bg-white border border-slate-200 rounded-full px-4 py-2.5 text-xs font-bold focus:outline-none focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 shadow-sm transition-all" required>
+                                        <button type="submit" class="text-white bg-violet-600 hover:bg-violet-700 w-9 h-9 rounded-full flex items-center justify-center transition-all shadow-md active:scale-95 shrink-0">
+                                            <span class="material-symbols-outlined text-[16px]">send</span>
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
-                            <div class="flex items-center gap-3 self-start md:self-auto shrink-0">
-                                <span class="${statusColor} px-3 py-1.5 rounded-lg text-[11px] font-extrabold flex items-center gap-1.5 border uppercase tracking-wider">
-                                    <span class="material-symbols-outlined" style="font-size: 14px;">${icon}</span> ${report.status}
-                                </span>
-                            </div>
-                        </div>`;
+                        `;
+                        setTimeout(() => renderComments(rId), 0);
                     }
                 });
+
+                document.getElementById('stat-total').innerText = dbReports.length > 0 ? reports.length : '0';
+                document.getElementById('stat-pending').innerText = dbReports.length > 0 ? pending : '0';
+                document.getElementById('stat-resolved').innerText = dbReports.length > 0 ? resolved : '0';
+
             } catch(e) { console.error(e); }
         }
 
-        // 5. SUBMIT FORM
         async function submitReport(e) {
             e.preventDefault();
+            
+            let todayDate = new Date().toDateString();
+            let reportCount = parseInt(localStorage.getItem(`bh_reports_count_${todayDate}`)) || 0;
+            if(reportCount >= 3) {
+                showToast("Daily limit reached! You can only submit 3 reports per day.", true);
+                return;
+            }
+
             const btn = e.target.querySelector('button[type="submit"]');
-            btn.innerHTML = `<span class="material-symbols-outlined animate-spin">refresh</span> Processing...`;
-            
-            const payload = {
-                category: document.getElementById('reportCategory').value,
-                location: document.getElementById('reportLocation').value,
-                description: document.getElementById('reportDescription').value,
-                image: base64Image // Pwedeng ipadala sa backend kung i-u-update mo yung DB!
-            };
-            
+            btn.innerHTML = `<span class="material-symbols-outlined animate-spin">refresh</span> <span data-en="Processing..." data-ceb="Giproseso...">Processing...</span>`;
+            const payload = { category: document.getElementById('reportCategory').value, location: document.getElementById('reportLocation').value, description: document.getElementById('reportDescription').value, image: base64Image };
             try {
-                const res = await fetch('/api/submit-report', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+                const res = await fetch('/api/submit-report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const data = await res.json();
-                if(res.ok) {
-                    showToast(data.message);
-                    removeImage();
-                    resetLocationField();
-                    document.getElementById('reportForm').reset();
-                    document.getElementById('reportModal').classList.add('hidden');
-                    setTimeout(() => window.location.reload(), 2000);
-                } else { showToast(data.error, true); btn.innerHTML = `<span class="material-symbols-outlined">send</span> Submit Report`; }
+                if(res.ok) { 
+                    localStorage.setItem(`bh_reports_count_${todayDate}`, reportCount + 1);
+                    showToast("Report submitted! Admin will verify before posting."); 
+                    document.getElementById('reportModal').classList.add('hidden'); 
+                    setTimeout(() => window.location.reload(), 2000); 
+                } 
+                else { showToast(data.error, true); btn.innerHTML = `<span class="material-symbols-outlined">send</span> <span data-en="Submit Report" data-ceb="Ipadala ang Report">Submit Report</span>`; }
             } catch (error) { showToast('Network error', true); btn.innerHTML = `<span class="material-symbols-outlined">send</span> Submit Report`;}
         }
 
-        // 6. REDEEM REWARD LOGIC
         async function redeemItem(itemName, cost) {
             try {
-                const res = await fetch('/api/redeem', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ item_name: itemName, cost: cost })
-                });
+                const res = await fetch('/api/redeem', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ item_name: itemName, cost: cost }) });
                 const data = await res.json();
-                if(res.ok) {
-                    showToast(data.message);
-                    document.getElementById('rewardsModal').classList.add('hidden');
-                    setTimeout(() => window.location.reload(), 2000);
-                } else showToast(data.error, true);
+                if(res.ok) { 
+                    const refCode = 'REF-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+                    document.getElementById('ticketItemName').innerText = itemName;
+                    document.getElementById('ticketRefNo').innerText = refCode;
+                    document.getElementById('ticketModal').classList.remove('hidden');
+                } 
+                else showToast(data.error, true);
             } catch (error) { showToast('Network error', true); }
         }
 

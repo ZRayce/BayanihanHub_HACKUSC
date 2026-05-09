@@ -53,7 +53,6 @@ def init_db():
             category TEXT NOT NULL,
             location TEXT NOT NULL,
             description TEXT NOT NULL,
-            image_path TEXT,
             status TEXT DEFAULT 'Pending',
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users (user_id)
@@ -147,9 +146,11 @@ def send_otp():
     
     otp_code = str(random.randint(100000, 999999))
 
+    # --- DEBUG PRINT (DITO MO MAKIKITA ANG CODE SA TERMINAL) ---
     print("\n" + "="*40)
     print(f"🚀 [BACKUP] OTP FOR {email} IS: {otp_code}")
     print("="*40 + "\n")
+    # ---------------------------------------------------------
 
     try:
         conn = get_db_connection()
@@ -158,6 +159,7 @@ def send_otp():
         conn.commit()
         conn.close()
 
+        # ─── MABILIS NA EMAIL SENDER (WITH FLASK CONTEXT) ───
         from flask import current_app
         app_ctx = current_app.app_context()
 
@@ -228,12 +230,14 @@ def forgot_password():
     conn = get_db_connection()
     user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
         
+    # Security check: Does the email exist?
     if not user:
         conn.close()
         return jsonify({"error": "Hindi namin mahanap ang email na ito."}), 404
             
     otp_code = str(random.randint(100000, 999999))
         
+    # --- DEBUG PRINT PARA SA TERMINAL ---
     print("\n" + "="*40)
     print(f"🔑 [PASSWORD RESET] OTP FOR {email}: {otp_code}")
     print("="*40 + "\n")
@@ -244,6 +248,7 @@ def forgot_password():
         conn.commit()
         conn.close()
             
+        # ─── MABILIS NA EMAIL SENDER (WITH FLASK CONTEXT) ───
         from flask import current_app
         app_ctx = current_app.app_context()
 
@@ -273,9 +278,12 @@ def reset_password():
     conn = get_db_connection()
     record = conn.execute('SELECT * FROM otp_requests WHERE phone_number = ?', (email,)).fetchone()
         
+    # Verify the OTP code
     if record and record['otp_code'] == code and record['temp_data'] == 'reset_password':
         hashed_pw = generate_password_hash(new_password)
+        # Update password
         conn.execute('UPDATE users SET password_hash = ? WHERE email = ?', (hashed_pw, email))
+        # Clean up OTP
         conn.execute('DELETE FROM otp_requests WHERE phone_number = ?', (email,))
         conn.commit()
         conn.close()
@@ -289,6 +297,7 @@ def logout():
     session.clear()
     return redirect(url_for('home'))
 
+
 # --- DASHBOARDS ---
 
 @app.route('/admin-dashboard')
@@ -300,25 +309,11 @@ def admin_dashboard():
     
     return render_template('Admin_Dashboard.html', user=user)
 
-# --- ADMIN STATUS UPDATE API ---
-@app.route('/api/update-status', methods=['POST'])
-@login_required
-def update_status():
-    if session.get('role') != 'official':
-        return jsonify({"error": "Unauthorized"}), 403
-        
-    data = request.json
-    report_id = data.get('report_id')
-    new_status = data.get('status')
-    
-    try:
-        conn = get_db_connection()
-        conn.execute('UPDATE reports SET status = ? WHERE report_id = ?', (new_status, report_id))
-        conn.commit()
-        conn.close()
-        return jsonify({"message": "Status updated!"}), 200
-    except Exception as e:
-        return jsonify({"error": "Database error"}), 500
+# --- ERROR HANDLERS ---
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    return render_template('500.html'), 500
 
 # --- REGISTER BLUEPRINTS ---
 from user import user_bp
@@ -328,10 +323,6 @@ app.register_blueprint(user_bp)
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
-
-@app.errorhandler(500)
-def internal_server_error(e):
-    return render_template('500.html'), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
