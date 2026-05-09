@@ -59,7 +59,8 @@
         /* Modal */
         .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.6); backdrop-filter: blur(6px); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
         .modal-overlay.active { opacity: 1; pointer-events: all; }
-        .modal-box { background: #fff; border-radius: 2rem; width: 100%; max-width: 460px; padding: 2.5rem; transform: translateY(16px) scale(0.98); transition: transform 0.3s cubic-bezier(0.22,1,0.36,1); box-shadow: 0 32px 80px -16px rgba(0,0,0,0.22); }
+        .modal-box { background: #fff; border-radius: 1.5rem; width: 100%; max-width: 460px; padding: 1.5rem; transform: translateY(16px) scale(0.98); transition: transform 0.3s cubic-bezier(0.22,1,0.36,1); box-shadow: 0 32px 80px -16px rgba(0,0,0,0.22); }
+        @media (min-width: 768px) { .modal-box { border-radius: 2rem; padding: 2.5rem; } }
         .modal-overlay.active .modal-box { transform: translateY(0) scale(1); }
 
         /* Toast */
@@ -71,7 +72,8 @@
         .news-extra.visible { display: block; }
 
         /* Input focus ring */
-        .inp { width:100%; border:1.5px solid #e2e8f0; border-radius:0.875rem; padding:0.75rem 1rem; font-size:0.9rem; outline:none; transition:border-color 0.2s, box-shadow 0.2s; font-family:'Manrope',sans-serif; }
+        .inp { width:100%; border:1.5px solid #e2e8f0; border-radius:0.75rem; padding:0.65rem 1rem; font-size:0.875rem; outline:none; transition:border-color 0.2s, box-shadow 0.2s; font-family:'Manrope',sans-serif; }
+        @media (min-width: 768px) { .inp { border-radius:0.875rem; padding:0.75rem 1rem; font-size:0.9rem; } }
         .inp:focus { border-color:#8b5cf6; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15); }
 
         /* Step badge */
@@ -89,7 +91,8 @@
 
         /* Loading Overlay */
         #loadingOverlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .jumping-logo { width: 80px; height: 80px; animation: jump 0.6s ease-in-out infinite alternate; }
+        .jumping-logo { width: 60px; height: 60px; animation: jump 0.6s ease-in-out infinite alternate; }
+        @media (min-width: 768px) { .jumping-logo { width: 80px; height: 80px; } }
         @keyframes jump { from { transform: translateY(0); } to { transform: translateY(-20px); } }
 
         .eye-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; cursor: pointer; border: none; background: none; }
@@ -100,50 +103,50 @@
 
     <div id="loadingOverlay">
         <img src="{{ url_for('static', filename='Images/BAYANIHANHUB_LOGO.png') }}" onerror="this.src='https://via.placeholder.com/80?text=BH'" class="jumping-logo" alt="Loading...">
-        <p style="margin-top:20px; font-weight:800; color:#6d28d9; letter-spacing: 1px;">Connecting to BayanihanHub...</p>
+        <p class="mt-4 md:mt-5 font-extrabold text-violet-700 tracking-wide text-sm md:text-base">Connecting to BayanihanHub...</p>
     </div>
 
     <!-- ─── LOGIN MODAL ─── -->
     <div class="modal-overlay" id="loginModal" role="dialog" aria-modal="true">
-        <div class="modal-box p-8 md:p-10">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-extrabold text-violet-900 tracking-tight">Welcome back</h2>
-                <button onclick="closeModal('loginModal')" class="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
-                    <span class="material-symbols-outlined text-slate-400">close</span>
+        <div class="modal-box">
+            <div class="flex items-center justify-between mb-4 md:mb-6">
+                <h2 class="text-xl md:text-2xl font-extrabold text-violet-900 tracking-tight">Welcome back</h2>
+                <button onclick="closeModal('loginModal')" class="w-8 h-8 md:w-9 md:h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined text-slate-400 text-sm md:text-base">close</span>
                 </button>
             </div>
-            <p class="text-slate-500 text-sm mb-6 font-medium">Please enter your details to sign in.</p>
+            <p class="text-slate-500 text-xs md:text-sm mb-5 md:mb-6 font-medium">Please enter your details to sign in.</p>
             
-            <form class="space-y-4" onsubmit="handleLogin(event)">
+            <form class="space-y-3.5 md:space-y-4" onsubmit="handleLogin(event)">
                 <div class="space-y-1">
-                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Email Address</label>
+                    <label class="text-[9px] md:text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Email Address</label>
                     <div class="relative">
-                        <input type="email" id="loginEmail" class="inp pl-10" placeholder="name@example.com" required/>
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">mail</span>
+                        <input type="email" id="loginEmail" class="inp pl-9 md:pl-10" placeholder="name@example.com" required/>
+                        <span class="material-symbols-outlined absolute left-2.5 md:left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base md:text-lg">mail</span>
                     </div>
                 </div>
                 
                 <div class="space-y-1">
-                    <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Password</label>
+                    <label class="text-[9px] md:text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Password</label>
                     <div class="relative">
-                        <input type="password" id="loginPassword" class="inp pl-10" placeholder="••••••••" required/>
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">lock</span>
-                        <button type="button" onclick="togglePass('loginPassword', this)" class="eye-btn material-symbols-outlined">visibility</button>
+                        <input type="password" id="loginPassword" class="inp pl-9 md:pl-10" placeholder="••••••••" required/>
+                        <span class="material-symbols-outlined absolute left-2.5 md:left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base md:text-lg">lock</span>
+                        <button type="button" onclick="togglePass('loginPassword', this)" class="eye-btn material-symbols-outlined text-sm md:text-base">visibility</button>
                     </div>
                 </div>
                 
-                <div class="flex items-center justify-between pt-2">
-                    <label class="flex items-center gap-2 cursor-pointer">
-                        <input type="checkbox" class="w-4 h-4 rounded border-slate-300 text-violet-700 focus:ring-violet-700"/>
-                        <span class="text-xs font-bold text-slate-500">Remember me</span>
+                <div class="flex items-center justify-between pt-1 md:pt-2">
+                    <label class="flex items-center gap-1.5 md:gap-2 cursor-pointer">
+                        <input type="checkbox" class="w-3.5 h-3.5 md:w-4 md:h-4 rounded border-slate-300 text-violet-700 focus:ring-violet-700"/>
+                        <span class="text-[11px] md:text-xs font-bold text-slate-500">Remember me</span>
                     </label>
-                    <a href="#" onclick="switchModal('loginModal', 'forgotModal')" class="text-xs text-violet-700 hover:text-violet-800 font-extrabold">Forgot Password?</a>
+                    <a href="#" onclick="switchModal('loginModal', 'forgotModal')" class="text-[11px] md:text-xs text-violet-700 hover:text-violet-800 font-extrabold">Forgot Password?</a>
                 </div>
                 
-                <button type="submit" class="w-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white py-3.5 rounded-xl font-black text-sm hover:shadow-lg hover:shadow-violet-500/30 active:scale-95 transition-all mt-4">Login to Dashboard</button>
+                <button type="submit" class="w-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white py-3 md:py-3.5 rounded-xl font-black text-sm md:text-base hover:shadow-lg hover:shadow-violet-500/30 active:scale-95 transition-all mt-4">Login to Dashboard</button>
             </form>
 
-            <p class="text-center text-xs font-medium text-slate-500 mt-6">
+            <p class="text-center text-[11px] md:text-xs font-medium text-slate-500 mt-5 md:mt-6">
                 Don't have an account? <a href="#" onclick="switchModal('loginModal', 'signupModal')" class="text-violet-700 font-extrabold hover:underline">Sign Up</a>
             </p>
         </div>
@@ -151,33 +154,33 @@
 
     <!-- ─── FORGOT PASSWORD MODAL ─── -->
     <div class="modal-overlay hidden" id="forgotModal" role="dialog" aria-modal="true">
-        <div class="modal-box p-8 md:p-10">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-extrabold text-violet-900 tracking-tight">Reset Password</h2>
-                <button onclick="closeModal('forgotModal')"><span class="material-symbols-outlined text-slate-400">close</span></button>
+        <div class="modal-box">
+            <div class="flex items-center justify-between mb-4 md:mb-6">
+                <h2 class="text-xl md:text-2xl font-extrabold text-violet-900 tracking-tight">Reset Password</h2>
+                <button onclick="closeModal('forgotModal')"><span class="material-symbols-outlined text-slate-400 text-sm md:text-base">close</span></button>
             </div>
             
-            <div id="forgotStep1" class="space-y-4 animate-fade-in">
-                <p class="text-slate-500 text-sm font-medium">Enter your registered email address to receive a reset code.</p>
+            <div id="forgotStep1" class="space-y-3.5 md:space-y-4 animate-fade-in">
+                <p class="text-slate-500 text-xs md:text-sm font-medium">Enter your registered email address to receive a reset code.</p>
                 <div class="relative">
-                    <input type="email" id="resetEmail" class="inp pl-10" placeholder="name@example.com" required/>
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">mail</span>
+                    <input type="email" id="resetEmail" class="inp pl-9 md:pl-10" placeholder="name@example.com" required/>
+                    <span class="material-symbols-outlined absolute left-2.5 md:left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base md:text-lg">mail</span>
                 </div>
-                <button type="button" onclick="sendResetOTP()" class="w-full bg-violet-700 text-white py-3.5 rounded-xl font-black mt-4 shadow-lg hover:bg-violet-800 active:scale-95 transition-all">Send Reset Code</button>
+                <button type="button" onclick="sendResetOTP()" class="w-full bg-violet-700 text-white py-3 md:py-3.5 rounded-xl font-black text-sm md:text-base mt-2 md:mt-4 shadow-lg hover:bg-violet-800 active:scale-95 transition-all">Send Reset Code</button>
             </div>
 
-            <div id="forgotStep2" class="hidden space-y-4 animate-scale-up">
-                <p class="text-slate-500 text-sm font-medium">Enter the 6-digit code sent to your email and your new password.</p>
-                <input type="text" id="resetOTP" maxlength="6" class="w-full border-2 border-violet-100 rounded-2xl py-3 text-center text-2xl font-black tracking-[0.5em] text-violet-700 focus:border-violet-500 outline-none" placeholder="000000" required/>
+            <div id="forgotStep2" class="hidden space-y-3.5 md:space-y-4 animate-scale-up">
+                <p class="text-slate-500 text-xs md:text-sm font-medium">Enter the 6-digit code sent to your email and your new password.</p>
+                <input type="text" id="resetOTP" maxlength="6" class="w-full border-2 border-violet-100 rounded-xl md:rounded-2xl py-2.5 md:py-3 text-center text-xl md:text-2xl font-black tracking-[0.4em] md:tracking-[0.5em] text-violet-700 focus:border-violet-500 outline-none" placeholder="000000" required/>
                 <div class="relative">
-                    <input type="password" id="newPassword" class="inp pl-10" placeholder="New Password" required/>
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">lock</span>
-                    <button type="button" onclick="togglePass('newPassword', this)" class="eye-btn material-symbols-outlined">visibility</button>
+                    <input type="password" id="newPassword" class="inp pl-9 md:pl-10" placeholder="New Password" required/>
+                    <span class="material-symbols-outlined absolute left-2.5 md:left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base md:text-lg">lock</span>
+                    <button type="button" onclick="togglePass('newPassword', this)" class="eye-btn material-symbols-outlined text-sm md:text-base">visibility</button>
                 </div>
-                <button type="button" onclick="submitNewPassword()" class="w-full bg-emerald-500 text-white py-3.5 rounded-xl font-black mt-4 shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 active:scale-95 transition-all">Update Password</button>
+                <button type="button" onclick="submitNewPassword()" class="w-full bg-emerald-500 text-white py-3 md:py-3.5 rounded-xl font-black text-sm md:text-base mt-2 md:mt-4 shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 active:scale-95 transition-all">Update Password</button>
             </div>
             
-            <p class="text-center text-xs font-medium text-slate-500 mt-6">
+            <p class="text-center text-[11px] md:text-xs font-medium text-slate-500 mt-5 md:mt-6">
                 Remembered it? <a href="#" onclick="switchModal('forgotModal', 'loginModal')" class="text-violet-700 font-extrabold hover:underline">Log In</a>
             </p>
         </div>
@@ -185,63 +188,63 @@
 
     <!-- ─── SIGNUP MODAL ─── -->
     <div class="modal-overlay" id="signupModal" role="dialog" aria-modal="true">
-        <div class="modal-box p-8 md:p-10 transition-all duration-500 ease-in-out" style="max-width: 480px;">
+        <div class="modal-box transition-all duration-500 ease-in-out" style="max-width: 480px;">
             <div class="flex items-center justify-between mb-2">
-                <h2 class="text-2xl md:text-3xl font-extrabold text-violet-900 tracking-tight">Create Account</h2>
-                <button onclick="closeModal('signupModal')" class="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
-                    <span class="material-symbols-outlined text-slate-400">close</span>
+                <h2 class="text-xl md:text-3xl font-extrabold text-violet-900 tracking-tight">Create Account</h2>
+                <button onclick="closeModal('signupModal')" class="w-8 h-8 md:w-9 md:h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined text-slate-400 text-sm md:text-base">close</span>
                 </button>
             </div>
-            <p class="text-slate-500 text-sm mb-8 font-medium">Be part of the solution in your community.</p>
+            <p class="text-slate-500 text-xs md:text-sm mb-5 md:mb-8 font-medium">Be part of the solution in your community.</p>
             
-            <form class="space-y-5" id="signupForm" onsubmit="handleSignupSubmit(event)">
-                <div id="signupStep1" class="space-y-4 animate-fade-in">
-                    <div class="space-y-3">
+            <form class="space-y-4 md:space-y-5" id="signupForm" onsubmit="handleSignupSubmit(event)">
+                <div id="signupStep1" class="space-y-3.5 md:space-y-4 animate-fade-in">
+                    <div class="space-y-2.5 md:space-y-3">
                         <div class="relative">
-                            <input type="text" id="regName" class="inp pl-10" placeholder="Full Name" required/>
-                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">person</span>
+                            <input type="text" id="regName" class="inp pl-9 md:pl-10" placeholder="Full Name" required/>
+                            <span class="material-symbols-outlined absolute left-2.5 md:left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base md:text-lg">person</span>
                         </div>
                         <div class="relative">
-                            <input type="email" id="regEmail" class="inp pl-10" placeholder="Email Address" required/>
-                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">mail</span>
+                            <input type="email" id="regEmail" class="inp pl-9 md:pl-10" placeholder="Email Address" required/>
+                            <span class="material-symbols-outlined absolute left-2.5 md:left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base md:text-lg">mail</span>
                         </div>
                         <div class="relative">
-                            <input type="password" id="regPass" class="inp pl-10" placeholder="Create Password" required/>
-                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">lock</span>
-                            <button type="button" onclick="togglePass('regPass', this)" class="eye-btn material-symbols-outlined">visibility</button>
+                            <input type="password" id="regPass" class="inp pl-9 md:pl-10" placeholder="Create Password" required/>
+                            <span class="material-symbols-outlined absolute left-2.5 md:left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base md:text-lg">lock</span>
+                            <button type="button" onclick="togglePass('regPass', this)" class="eye-btn material-symbols-outlined text-sm md:text-base">visibility</button>
                         </div>
                         <div class="relative">
-                            <input type="tel" id="phoneNumber" class="inp pl-10" placeholder="09XX XXX XXXX" required/>
-                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">smartphone</span>
+                            <input type="tel" id="phoneNumber" class="inp pl-9 md:pl-10" placeholder="09XX XXX XXXX" required/>
+                            <span class="material-symbols-outlined absolute left-2.5 md:left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base md:text-lg">smartphone</span>
                         </div>
                     </div>
-                    <button type="button" onclick="triggerOTP()" class="w-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white py-3.5 rounded-xl font-black text-sm active:scale-95 transition-all shadow-lg shadow-violet-500/20 mt-4 flex items-center justify-center gap-2">
+                    <button type="button" onclick="triggerOTP()" class="w-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white py-3 md:py-3.5 rounded-xl font-black text-sm md:text-base active:scale-95 transition-all shadow-lg shadow-violet-500/20 mt-3 md:mt-4 flex items-center justify-center gap-1.5 md:gap-2">
                         <span>Send Verification Code</span>
-                        <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                        <span class="material-symbols-outlined text-base md:text-[18px]">arrow_forward</span>
                     </button>
                 </div>
 
-                <div id="signupStep2" class="hidden space-y-6 animate-scale-up">
-                    <div class="text-center space-y-2">
-                        <div class="w-16 h-16 bg-violet-50 text-violet-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-violet-100">
-                            <span class="material-symbols-outlined text-3xl">mark_email_read</span>
+                <div id="signupStep2" class="hidden space-y-5 md:space-y-6 animate-scale-up">
+                    <div class="text-center space-y-1.5 md:space-y-2">
+                        <div class="w-12 h-12 md:w-16 md:h-16 bg-violet-50 text-violet-600 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-4 border border-violet-100">
+                            <span class="material-symbols-outlined text-2xl md:text-3xl">mark_email_read</span>
                         </div>
-                        <h3 class="font-black text-slate-800 text-lg">Check your Inbox</h3>
-                        <p class="text-xs text-slate-500 font-medium">I-type ang 6-digit code na pinadala namin.</p>
+                        <h3 class="font-black text-slate-800 text-base md:text-lg">Check your Inbox</h3>
+                        <p class="text-[11px] md:text-xs text-slate-500 font-medium">I-type ang 6-digit code na pinadala namin.</p>
                     </div>
                     <div class="relative">
-                        <input type="text" id="otpCodeInput" maxlength="6" class="w-full border-2 border-violet-100 rounded-2xl py-4 text-center text-3xl font-black tracking-[0.5em] text-violet-700 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all outline-none" placeholder="000000" required/>
+                        <input type="text" id="otpCodeInput" maxlength="6" class="w-full border-2 border-violet-100 rounded-xl md:rounded-2xl py-3 md:py-4 text-center text-2xl md:text-3xl font-black tracking-[0.4em] md:tracking-[0.5em] text-violet-700 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 transition-all outline-none" placeholder="000000" required/>
                     </div>
-                    <button type="submit" class="w-full bg-emerald-500 text-white py-4 rounded-2xl font-black text-sm hover:bg-emerald-600 active:scale-95 transition-all shadow-lg shadow-emerald-500/20">
+                    <button type="submit" class="w-full bg-emerald-500 text-white py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-sm md:text-base hover:bg-emerald-600 active:scale-95 transition-all shadow-lg shadow-emerald-500/20">
                         Verify & Get Started
                     </button>
-                    <button type="button" onclick="goBackToStep1()" class="w-full text-xs text-slate-400 hover:text-violet-600 font-bold transition-colors">
+                    <button type="button" onclick="goBackToStep1()" class="w-full text-[11px] md:text-xs text-slate-400 hover:text-violet-600 font-bold transition-colors">
                         Wrong details? Go back and edit.
                     </button>
                 </div>
             </form>
             
-            <p class="text-center text-xs font-medium text-slate-500 mt-8">
+            <p class="text-center text-[11px] md:text-xs font-medium text-slate-500 mt-6 md:mt-8">
                 Already a member? <a href="#" onclick="switchModal('signupModal', 'loginModal')" class="text-violet-700 font-extrabold hover:underline">Log In</a>
             </p>
         </div>
@@ -250,24 +253,24 @@
     <!-- ─── SHARE MODAL ─── -->
     <div class="modal-overlay" id="shareModal">
         <div class="modal-box" style="max-width:380px;">
-            <div class="flex items-center justify-between mb-5">
-                <h2 style="font-size:1.1rem;font-weight:800;" class="text-slate-900">Share this article</h2>
-                <button onclick="closeModal('shareModal')" class="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
-                    <span class="material-symbols-outlined text-slate-400">close</span>
+            <div class="flex items-center justify-between mb-4 md:mb-5">
+                <h2 class="text-lg md:text-[1.1rem] font-extrabold text-slate-900">Share this article</h2>
+                <button onclick="closeModal('shareModal')" class="w-8 h-8 md:w-9 md:h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined text-slate-400 text-sm md:text-base">close</span>
                 </button>
             </div>
-            <div id="shareArticleTitle" class="text-sm font-semibold text-slate-700 bg-slate-50 rounded-xl p-3 mb-5 border border-slate-100"></div>
-            <div class="grid grid-cols-3 gap-3 mb-5">
-                <button onclick="shareVia('facebook')" class="flex flex-col items-center gap-2 p-4 rounded-2xl bg-blue-50 hover:bg-blue-100 transition-colors group">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="#1877f2"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.413c0-3.025 1.792-4.697 4.533-4.697 1.313 0 2.686.236 2.686.236v2.971h-1.513c-1.491 0-1.956.93-1.956 1.886v2.264h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg>
+            <div id="shareArticleTitle" class="text-xs md:text-sm font-semibold text-slate-700 bg-slate-50 rounded-xl p-3 mb-4 md:mb-5 border border-slate-100"></div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 md:gap-3 mb-2 md:mb-5">
+                <button onclick="shareVia('facebook')" class="flex flex-row sm:flex-col items-center justify-center sm:justify-start gap-2.5 sm:gap-2 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-blue-50 hover:bg-blue-100 transition-colors group">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877f2"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.413c0-3.025 1.792-4.697 4.533-4.697 1.313 0 2.686.236 2.686.236v2.971h-1.513c-1.491 0-1.956.93-1.956 1.886v2.264h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg>
                     <span class="text-xs font-bold text-slate-600">Facebook</span>
                 </button>
-                <button onclick="shareVia('twitter')" class="flex flex-col items-center gap-2 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="#0f1419"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.632zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                <button onclick="shareVia('twitter')" class="flex flex-row sm:flex-col items-center justify-center sm:justify-start gap-2.5 sm:gap-2 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#0f1419"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.259 5.632zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                     <span class="text-xs font-bold text-slate-600">X / Twitter</span>
                 </button>
-                <button onclick="shareVia('copy')" class="flex flex-col items-center gap-2 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors">
-                    <span class="material-symbols-outlined text-slate-600" style="font-size:22px;">link</span>
+                <button onclick="shareVia('copy')" class="flex flex-row sm:flex-col items-center justify-center sm:justify-start gap-2.5 sm:gap-2 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors">
+                    <span class="material-symbols-outlined text-slate-600 text-[20px]">link</span>
                     <span class="text-xs font-bold text-slate-600">Copy Link</span>
                 </button>
             </div>
@@ -282,13 +285,13 @@
 
     <!-- ─── NAVBAR ─── -->
     <nav class="bg-white/80 backdrop-blur-xl fixed top-0 w-full z-50 border-b border-slate-200" style="height:64px;">
-        <div class="max-w-7xl mx-auto px-6 h-full flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-                <img src="{{ url_for('static', filename='Images/BAYANIHANHUB_LOGO.png') }}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt="BayaniHub Logo" class="h-9 w-9 rounded-xl shadow-sm"/>
-                <div style="display:none;width:36px;height:36px;background:#6d28d9;border-radius:10px;align-items:center;justify-content:center;">
-                    <span class="material-symbols-outlined text-white" style="font-size:20px;">location_city</span>
+        <div class="max-w-7xl mx-auto px-4 md:px-6 h-full flex items-center justify-between">
+            <div class="flex items-center gap-2 md:gap-2.5">
+                <img src="{{ url_for('static', filename='Images/BAYANIHANHUB_LOGO.png') }}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt="BayaniHub Logo" class="h-8 w-8 md:h-9 md:w-9 rounded-xl shadow-sm"/>
+                <div style="display:none;width:32px;height:32px;background:#6d28d9;border-radius:10px;align-items:center;justify-content:center;">
+                    <span class="material-symbols-outlined text-white text-[18px]">location_city</span>
                 </div>
-                <span style="font-size:19px; font-weight:800; letter-spacing:-0.03em;" class="text-slate-900">BayanihanHub</span>
+                <span class="text-[17px] md:text-[19px] font-extrabold tracking-tight text-slate-900">BayanihanHub</span>
             </div>
             
             <div class="hidden md:flex items-center gap-7">
@@ -296,12 +299,12 @@
                 <a href="#updates" class="nav-link text-sm font-semibold text-slate-600 hover:text-violet-700 transition-colors" data-en="Updates" data-ceb="Mga Balita">Updates</a>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 md:gap-3">
                 <div class="hidden md:flex bg-slate-100 p-1 rounded-full border border-slate-200">
-                    <button id="btnEng" onclick="setLang('en')" class="px-4 py-1.5 rounded-full text-xs font-black bg-white text-violet-700 shadow-sm transition-all">ENG</button>
-                    <button id="btnCeb" onclick="setLang('ceb')" class="px-4 py-1.5 rounded-full text-xs font-black text-slate-400 hover:text-slate-800 transition-all">CEB</button>
+                    <button id="btnEng" onclick="setLang('en')" class="px-3 md:px-4 py-1.5 rounded-full text-[11px] md:text-xs font-black bg-white text-violet-700 shadow-sm transition-all">ENG</button>
+                    <button id="btnCeb" onclick="setLang('ceb')" class="px-3 md:px-4 py-1.5 rounded-full text-[11px] md:text-xs font-black text-slate-400 hover:text-slate-800 transition-all">CEB</button>
                 </div>
-                <button onclick="openModal('loginModal')" class="bg-violet-700 text-white px-5 py-2 rounded-xl text-sm font-black hover:bg-violet-800 hover:shadow-lg hover:shadow-violet-700/20 active:scale-95 transition-all" data-en="Go to Dashboard" data-ceb="Adto sa Dashboard">
+                <button onclick="openModal('loginModal')" class="bg-violet-700 text-white px-4 py-2 md:px-5 md:py-2 rounded-xl text-xs md:text-sm font-black hover:bg-violet-800 hover:shadow-lg hover:shadow-violet-700/20 active:scale-95 transition-all" data-en="Go to Dashboard" data-ceb="Adto sa Dashboard">
                     Go to Dashboard
                 </button>
             </div>
@@ -310,25 +313,25 @@
 
     <main style="padding-top:64px;">
         <!-- HERO SECTION -->
-        <section class="py-24 md:py-32" id="hero">
-            <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                <div class="hero-reveal">
-                    <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-violet-50 text-violet-700 text-[10px] md:text-xs font-extrabold border border-violet-100 uppercase tracking-widest mb-8">
+        <section class="py-16 md:py-32" id="hero">
+            <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 items-center">
+                <div class="hero-reveal text-center md:text-left">
+                    <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-violet-50 text-violet-700 text-[10px] md:text-xs font-extrabold border border-violet-100 uppercase tracking-widest mb-6 md:mb-8">
                         <span class="material-symbols-outlined" style="font-size:14px;">verified</span>
                         <span data-en="Official Platform for Cebu City" data-ceb="Opisyal nga Plataporma sa Dakbayan sa Cebu">Official Platform for Cebu City</span>
                     </span>
-                    <h1 style="font-size:clamp(2.5rem,6vw,4rem); font-weight:800; line-height:1.1; letter-spacing:-0.03em;" class="text-slate-900 mb-6">
+                    <h1 class="text-[2.5rem] md:text-[4rem] font-extrabold leading-[1.1] tracking-tight text-slate-900 mb-4 md:mb-6">
                         <span data-en="Empowering the" data-ceb="Pagpalakas sa">Empowering the</span><br/>
                         <span class="bg-gradient-to-r from-violet-600 to-fuchsia-600 bg-clip-text text-transparent" data-en="Heart of Cebu" data-ceb="Puso ng Cebu">Heart of Cebu</span>
                     </h1>
-                    <p class="text-lg text-slate-600 font-medium leading-relaxed mb-10 max-w-lg" data-en="Access essential barangay services, report community concerns, and stay updated with official city initiatives through your digital neighbor." data-ceb="I-access ang mga serbisyo sa barangay, i-report ang mga alalahanin, ug maabante sa mga opisyal nga inisyatibo pinaagi sa inyong digital nga silingan.">
+                    <p class="text-base md:text-lg text-slate-600 font-medium leading-relaxed mb-8 md:mb-10 max-w-lg mx-auto md:mx-0" data-en="Access essential barangay services, report community concerns, and stay updated with official city initiatives through your digital neighbor." data-ceb="I-access ang mga serbisyo sa barangay, i-report ang mga alalahanin, ug maabante sa mga opisyal nga inisyatibo pinaagi sa inyong digital nga silingan.">
                         Access essential barangay services, report community concerns, and stay updated with official city initiatives through your digital neighbor.
                     </p>
-                    <button onclick="openModal('signupModal')" class="bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-8 py-4 rounded-2xl font-black text-base shadow-xl shadow-violet-600/25 hover:shadow-violet-600/40 hover:-translate-y-0.5 active:scale-95 transition-all" data-en="Get Started" data-ceb="Magsugod">
+                    <button onclick="openModal('signupModal')" class="w-full md:w-auto bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-6 py-3.5 md:px-8 md:py-4 rounded-xl md:rounded-2xl font-black text-sm md:text-base shadow-xl shadow-violet-600/25 hover:shadow-violet-600/40 hover:-translate-y-0.5 active:scale-95 transition-all" data-en="Get Started" data-ceb="Magsugod">
                         Get Started
                     </button>
                 </div>
-                <div class="hero-reveal delay-200 relative">
+                <div class="hero-reveal delay-200 relative hidden md:block">
                     <div class="rounded-[2.5rem] overflow-hidden border-8 border-white card-shadow group">
                         <img src="{{ url_for('static', filename='Images/Screenshot 2026-04-29 234734.png') }}" onerror="this.src='https://images.unsplash.com/photo-1518331647614-7a1f04cd34cf?auto=format&fit=crop&w=800&q=80'" alt="Community Hub Update" class="w-full h-[520px] object-cover transition-transform duration-700 group-hover:scale-105"/>
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-900/50 via-transparent to-transparent pointer-events-none"></div>
@@ -347,38 +350,38 @@
         </section>
 
         <!-- HOW IT WORKS -->
-        <section class="py-24 bg-white border-y border-slate-100" id="how-it-works">
+        <section class="py-16 md:py-24 bg-white border-y border-slate-100" id="how-it-works">
             <div class="max-w-7xl mx-auto px-6">
-                <div class="text-center mb-16" data-reveal>
-                    <h2 style="font-size:2.25rem; font-weight:800; letter-spacing:-0.02em;" class="text-slate-900 mb-4" data-en="Transparency in Action" data-ceb="Transparency sa Aksyon">Transparency in Action</h2>
-                    <p class="text-slate-600 font-medium text-lg max-w-xl mx-auto" data-en="A seamless digital process designed to keep every Citizen informed and empowered." data-ceb="Usa ka padayon nga digital nga proseso nga gidisenyo aron mapahibalo ug mahatagan og gahom ang matag Lungsoranon.">A seamless digital process designed to keep every Citizen informed and empowered.</p>
+                <div class="text-center mb-12 md:mb-16" data-reveal>
+                    <h2 class="text-[2rem] md:text-[2.25rem] font-extrabold tracking-tight text-slate-900 mb-3 md:mb-4" data-en="Transparency in Action" data-ceb="Transparency sa Aksyon">Transparency in Action</h2>
+                    <p class="text-slate-600 font-medium text-base md:text-lg max-w-xl mx-auto" data-en="A seamless digital process designed to keep every Citizen informed and empowered." data-ceb="Usa ka padayon nga digital nga proseso nga gidisenyo aron mapahibalo ug mahatagan og gahom ang matag Lungsoranon.">A seamless digital process designed to keep every Citizen informed and empowered.</p>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
                     <!-- Step 1: Violet -->
-                    <div class="bg-slate-50 border border-slate-100 p-9 rounded-[2rem] transition-all group hover:bg-white hover:shadow-xl hover:shadow-violet-500/5 hover:-translate-y-1" data-reveal data-delay="100">
-                        <div class="w-14 h-14 bg-violet-100 border border-violet-200 rounded-2xl flex items-center justify-center mb-7 group-hover:scale-110 transition-transform">
+                    <div class="bg-slate-50 border border-slate-100 p-8 md:p-9 rounded-[2rem] transition-all group hover:bg-white hover:shadow-xl hover:shadow-violet-500/5 hover:-translate-y-1 text-center md:text-left" data-reveal data-delay="100">
+                        <div class="w-14 h-14 bg-violet-100 border border-violet-200 rounded-2xl flex items-center justify-center mb-6 md:mb-7 group-hover:scale-110 transition-transform mx-auto md:mx-0">
                             <span class="material-symbols-outlined text-violet-600 text-2xl">photo_camera</span>
                         </div>
                         <p class="step-badge text-violet-600" data-en="Step 1" data-ceb="Lakang 1">Step 1</p>
-                        <h3 style="font-size:1.2rem; font-weight:800;" class="text-slate-900 mb-3" data-en="Snap & Report" data-ceb="Kuha & I-report">Snap & Report</h3>
+                        <h3 class="text-lg md:text-[1.2rem] font-extrabold text-slate-900 mb-2 md:mb-3" data-en="Snap & Report" data-ceb="Kuha & I-report">Snap & Report</h3>
                         <p class="text-slate-500 font-medium text-sm leading-relaxed" data-en="Take a photo, select a category, and submit instantly from your phone with geotagged accuracy." data-ceb="Kumuha og litrato, pilii ang kategorya, ug i-submit dayon gikan sa inyong telepono nga may geotagged nga katukma.">Take a photo, select a category, and submit instantly from your phone with geotagged accuracy.</p>
                     </div>
                     <!-- Step 2: Amber -->
-                    <div class="bg-slate-50 border border-slate-100 p-9 rounded-[2rem] transition-all group hover:bg-white hover:shadow-xl hover:shadow-amber-500/5 hover:-translate-y-1" data-reveal data-delay="200">
-                        <div class="w-14 h-14 bg-amber-100 border border-amber-200 rounded-2xl flex items-center justify-center mb-7 group-hover:scale-110 transition-transform">
+                    <div class="bg-slate-50 border border-slate-100 p-8 md:p-9 rounded-[2rem] transition-all group hover:bg-white hover:shadow-xl hover:shadow-amber-500/5 hover:-translate-y-1 text-center md:text-left" data-reveal data-delay="200">
+                        <div class="w-14 h-14 bg-amber-100 border border-amber-200 rounded-2xl flex items-center justify-center mb-6 md:mb-7 group-hover:scale-110 transition-transform mx-auto md:mx-0">
                             <span class="material-symbols-outlined text-amber-600 text-2xl">engineering</span>
                         </div>
                         <p class="step-badge text-amber-600" data-en="Step 2" data-ceb="Lakang 2">Step 2</p>
-                        <h3 style="font-size:1.2rem; font-weight:800;" class="text-slate-900 mb-3" data-en="Track Progress" data-ceb="Sunda ang Progreso">Track Progress</h3>
+                        <h3 class="text-lg md:text-[1.2rem] font-extrabold text-slate-900 mb-2 md:mb-3" data-en="Track Progress" data-ceb="Sunda ang Progreso">Track Progress</h3>
                         <p class="text-slate-500 font-medium text-sm leading-relaxed" data-en="Get live notifications as officials review, validate, and assign tasks to the right teams." data-ceb="Makadawat og live nga mga abiso samtang ginareview, gi-validate, ug gi-assigned sa mga opisyal ang mga buluhaton.">Get live notifications as officials review, validate, and assign tasks to the right teams.</p>
                     </div>
                     <!-- Step 3: Emerald -->
-                    <div class="bg-slate-50 border border-slate-100 p-9 rounded-[2rem] transition-all group hover:bg-white hover:shadow-xl hover:shadow-emerald-500/5 hover:-translate-y-1" data-reveal data-delay="300">
-                        <div class="w-14 h-14 bg-emerald-100 border border-emerald-200 rounded-2xl flex items-center justify-center mb-7 group-hover:scale-110 transition-transform">
+                    <div class="bg-slate-50 border border-slate-100 p-8 md:p-9 rounded-[2rem] transition-all group hover:bg-white hover:shadow-xl hover:shadow-emerald-500/5 hover:-translate-y-1 text-center md:text-left" data-reveal data-delay="300">
+                        <div class="w-14 h-14 bg-emerald-100 border border-emerald-200 rounded-2xl flex items-center justify-center mb-6 md:mb-7 group-hover:scale-110 transition-transform mx-auto md:mx-0">
                             <span class="material-symbols-outlined text-emerald-600 text-2xl">verified</span>
                         </div>
                         <p class="step-badge text-emerald-600" data-en="Step 3" data-ceb="Lakang 3">Step 3</p>
-                        <h3 style="font-size:1.2rem; font-weight:800;" class="text-slate-900 mb-3" data-en="Issue Resolved" data-ceb="Narisolba na ang Isyu">Issue Resolved</h3>
+                        <h3 class="text-lg md:text-[1.2rem] font-extrabold text-slate-900 mb-2 md:mb-3" data-en="Issue Resolved" data-ceb="Narisolba na ang Isyu">Issue Resolved</h3>
                         <p class="text-slate-500 font-medium text-sm leading-relaxed" data-en="Receive a final update with photo proof once the improvement is complete. Your voice matters." data-ceb="Makadawat og katapusang update nga may litrato sa katapusan. Ang inyong tingog importante.">Receive a final update with photo proof once the improvement is complete. Your voice matters.</p>
                     </div>
                 </div>
@@ -386,70 +389,70 @@
         </section>
 
         <!-- COMMUNITY UPDATES / NEWS -->
-        <section class="py-24" id="updates">
+        <section class="py-16 md:py-24" id="updates">
             <div class="max-w-7xl mx-auto px-6">
-                <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12" data-reveal>
-                    <div>
-                        <h2 style="font-size:2rem; font-weight:800; letter-spacing:-0.02em;" class="text-slate-900 mb-2" data-en="Community Updates" data-ceb="Mga Update sa Komunidad">Community Updates</h2>
-                        <p class="text-slate-600 font-medium" data-en="Stay informed about the latest news and progress in Cebu City." data-ceb="Mahibalo sa pinakabag-o nga balita sa Cebu City.">Stay informed about the latest news and progress in Cebu.</p>
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6 mb-10 md:mb-12" data-reveal>
+                    <div class="text-center md:text-left">
+                        <h2 class="text-[1.75rem] md:text-[2rem] font-extrabold tracking-tight text-slate-900 mb-2" data-en="Community Updates" data-ceb="Mga Update sa Komunidad">Community Updates</h2>
+                        <p class="text-slate-600 font-medium text-sm md:text-base" data-en="Stay informed about the latest news and progress in Cebu City." data-ceb="Mahibalo sa pinakabag-o nga balita sa Cebu City.">Stay informed about the latest news and progress in Cebu.</p>
                     </div>
-                    <button id="viewAllBtn" onclick="toggleAllNews()" class="text-violet-700 font-black flex items-center gap-2 hover:translate-x-1 transition-transform text-sm" data-en="View All News" data-ceb="Tan-awa Tanan nga Balita">
+                    <button id="viewAllBtn" onclick="toggleAllNews()" class="mx-auto md:mx-0 text-violet-700 font-black flex items-center justify-center gap-1.5 hover:translate-x-1 transition-transform text-sm" data-en="View All News" data-ceb="Tan-awa Tanan nga Balita">
                         <span id="viewAllLabel">View All News</span> <span class="material-symbols-outlined text-lg" id="viewAllIcon">arrow_right_alt</span>
                     </button>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8" id="newsGrid">
-                    <article class="bg-white rounded-[2rem] overflow-hidden card-shadow card-shadow-hover border border-slate-100 transition-all group" data-reveal data-delay="100">
-                        <div class="overflow-hidden h-52">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8" id="newsGrid">
+                    <article class="bg-white rounded-[1.5rem] md:rounded-[2rem] overflow-hidden card-shadow card-shadow-hover border border-slate-100 transition-all group" data-reveal data-delay="100">
+                        <div class="overflow-hidden h-48 md:h-52">
                             <img src="https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=800&q=80" alt="Sinulog" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"/>
                         </div>
-                        <div class="p-7">
-                            <span class="text-emerald-600 text-xs font-bold uppercase tracking-widest mb-2 block" data-en="Events" data-ceb="Mga Okasyon">Events</span>
-                            <h3 style="font-size:1.1rem; font-weight:800; line-height:1.35;" class="text-slate-900 mb-3 group-hover:text-violet-700 transition-colors" data-en="Sinulog 2026 Preparations" data-ceb="Mga Paghanda sa Sinulog 2026">Sinulog 2026 Preparations</h3>
-                            <p class="text-slate-500 text-sm leading-relaxed line-clamp-3 mb-6 font-medium" data-en="City officials announce traffic rerouting and security measures for the upcoming festival season. Get the full schedule here." data-ceb="Ang mga opisyal sa siyudad nag-anunsyo sa pagbabago sa trapiko ug mga security measures para sa dapit nga festival season.">City officials announce traffic rerouting and security measures for the upcoming festival season. Get the full schedule here.</p>
-                            <div class="flex items-center justify-between pt-5 border-t border-slate-100">
-                                <span class="text-xs text-slate-400 font-bold">Jan 12, 2026</span>
+                        <div class="p-5 md:p-7">
+                            <span class="text-emerald-600 text-[11px] md:text-xs font-bold uppercase tracking-widest mb-2 block" data-en="Events" data-ceb="Mga Okasyon">Events</span>
+                            <h3 class="text-lg md:text-[1.1rem] font-extrabold leading-[1.35] text-slate-900 mb-2 md:mb-3 group-hover:text-violet-700 transition-colors" data-en="Sinulog 2026 Preparations" data-ceb="Mga Paghanda sa Sinulog 2026">Sinulog 2026 Preparations</h3>
+                            <p class="text-slate-500 text-xs md:text-sm leading-relaxed line-clamp-3 mb-5 md:mb-6 font-medium" data-en="City officials announce traffic rerouting and security measures for the upcoming festival season. Get the full schedule here." data-ceb="Ang mga opisyal sa siyudad nag-anunsyo sa pagbabago sa trapiko ug mga security measures para sa dapit nga festival season.">City officials announce traffic rerouting and security measures for the upcoming festival season. Get the full schedule here.</p>
+                            <div class="flex items-center justify-between pt-4 md:pt-5 border-t border-slate-100">
+                                <span class="text-[11px] md:text-xs text-slate-400 font-bold">Jan 12, 2026</span>
                                 <div class="share-btn">
                                     <span class="tooltip" data-en="Share article" data-ceb="I-share ang artikulo">Share article</span>
-                                    <button onclick="openShare('Sinulog 2026 Preparations')" class="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
-                                        <span class="material-symbols-outlined text-slate-400 text-lg">share</span>
+                                    <button onclick="openShare('Sinulog 2026 Preparations')" class="w-8 h-8 md:w-9 md:h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+                                        <span class="material-symbols-outlined text-slate-400 text-base md:text-lg">share</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </article>
-                    <article class="bg-white rounded-[2rem] overflow-hidden card-shadow card-shadow-hover border border-slate-100 transition-all group" data-reveal data-delay="200">
-                        <div class="overflow-hidden h-52">
+                    <article class="bg-white rounded-[1.5rem] md:rounded-[2rem] overflow-hidden card-shadow card-shadow-hover border border-slate-100 transition-all group" data-reveal data-delay="200">
+                        <div class="overflow-hidden h-48 md:h-52">
                             <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80" alt="Health Center" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"/>
                         </div>
-                        <div class="p-7">
-                            <span class="text-orange-500 text-xs font-bold uppercase tracking-widest mb-2 block" data-en="Infrastructure" data-ceb="Imprastraktura">Infrastructure</span>
-                            <h3 style="font-size:1.1rem; font-weight:800; line-height:1.35;" class="text-slate-900 mb-3 group-hover:text-violet-700 transition-colors" data-en="New Health Center Opening" data-ceb="Pagbukas sa Bag-ong Health Center">New Health Center Opening</h3>
-                            <p class="text-slate-500 text-sm leading-relaxed line-clamp-3 mb-6 font-medium" data-en="A state-of-the-art community health hub opens in Brgy. Guadalupe this Friday to serve over 5,000 residents." data-ceb="Usa ka moderno nga community health hub ang magbukas sa Brgy. Guadalupe karong Biyernes aron mag-alagad sa labaw pa sa 5,000 ka residente.">A state-of-the-art community health hub opens in Brgy. Guadalupe this Friday to serve over 5,000 residents.</p>
-                            <div class="flex items-center justify-between pt-5 border-t border-slate-100">
-                                <span class="text-xs text-slate-400 font-bold">Jan 10, 2026</span>
+                        <div class="p-5 md:p-7">
+                            <span class="text-orange-500 text-[11px] md:text-xs font-bold uppercase tracking-widest mb-2 block" data-en="Infrastructure" data-ceb="Imprastraktura">Infrastructure</span>
+                            <h3 class="text-lg md:text-[1.1rem] font-extrabold leading-[1.35] text-slate-900 mb-2 md:mb-3 group-hover:text-violet-700 transition-colors" data-en="New Health Center Opening" data-ceb="Pagbukas sa Bag-ong Health Center">New Health Center Opening</h3>
+                            <p class="text-slate-500 text-xs md:text-sm leading-relaxed line-clamp-3 mb-5 md:mb-6 font-medium" data-en="A state-of-the-art community health hub opens in Brgy. Guadalupe this Friday to serve over 5,000 residents." data-ceb="Usa ka moderno nga community health hub ang magbukas sa Brgy. Guadalupe karong Biyernes aron mag-alagad sa labaw pa sa 5,000 ka residente.">A state-of-the-art community health hub opens in Brgy. Guadalupe this Friday to serve over 5,000 residents.</p>
+                            <div class="flex items-center justify-between pt-4 md:pt-5 border-t border-slate-100">
+                                <span class="text-[11px] md:text-xs text-slate-400 font-bold">Jan 10, 2026</span>
                                 <div class="share-btn">
                                     <span class="tooltip">Share article</span>
-                                    <button onclick="openShare('New Health Center Opening')" class="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
-                                        <span class="material-symbols-outlined text-slate-400 text-lg">share</span>
+                                    <button onclick="openShare('New Health Center Opening')" class="w-8 h-8 md:w-9 md:h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+                                        <span class="material-symbols-outlined text-slate-400 text-base md:text-lg">share</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </article>
-                    <article class="bg-white rounded-[2rem] overflow-hidden card-shadow card-shadow-hover border border-slate-100 transition-all group" data-reveal data-delay="300">
-                        <div class="overflow-hidden h-52">
+                    <article class="bg-white rounded-[1.5rem] md:rounded-[2rem] overflow-hidden card-shadow card-shadow-hover border border-slate-100 transition-all group" data-reveal data-delay="300">
+                        <div class="overflow-hidden h-48 md:h-52">
                             <img src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=800&q=80" alt="Recycling Drive" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"/>
                         </div>
-                        <div class="p-7">
-                            <span class="text-violet-600 text-xs font-bold uppercase tracking-widest mb-2 block" data-en="Community" data-ceb="Komunidad">Community</span>
-                            <h3 style="font-size:1.1rem; font-weight:800; line-height:1.35;" class="text-slate-900 mb-3 group-hover:text-violet-700 transition-colors" data-en="Barangay Clean-up Drive" data-ceb="Barangay Clean-up Drive">Barangay Clean-up Drive</h3>
-                            <p class="text-slate-500 text-sm leading-relaxed line-clamp-3 mb-6 font-medium" data-en="Join neighbors this Saturday for a city-wide recycling initiative. Free tree seedlings for all participants!" data-ceb="Apil sa mga silingan karong Sabado alang sa usa ka recycling initiative sa tibuok siyudad. Libre nga mga punla sa kahoy alang sa tanan nga molahok!">Join neighbors this Saturday for a city-wide recycling initiative. Free tree seedlings for all participants!</p>
-                            <div class="flex items-center justify-between pt-5 border-t border-slate-100">
-                                <span class="text-xs text-slate-400 font-bold">Jan 08, 2026</span>
+                        <div class="p-5 md:p-7">
+                            <span class="text-violet-600 text-[11px] md:text-xs font-bold uppercase tracking-widest mb-2 block" data-en="Community" data-ceb="Komunidad">Community</span>
+                            <h3 class="text-lg md:text-[1.1rem] font-extrabold leading-[1.35] text-slate-900 mb-2 md:mb-3 group-hover:text-violet-700 transition-colors" data-en="Barangay Clean-up Drive" data-ceb="Barangay Clean-up Drive">Barangay Clean-up Drive</h3>
+                            <p class="text-slate-500 text-xs md:text-sm leading-relaxed line-clamp-3 mb-5 md:mb-6 font-medium" data-en="Join neighbors this Saturday for a city-wide recycling initiative. Free tree seedlings for all participants!" data-ceb="Apil sa mga silingan karong Sabado alang sa usa ka recycling initiative sa tibuok siyudad. Libre nga mga punla sa kahoy alang sa tanan nga molahok!">Join neighbors this Saturday for a city-wide recycling initiative. Free tree seedlings for all participants!</p>
+                            <div class="flex items-center justify-between pt-4 md:pt-5 border-t border-slate-100">
+                                <span class="text-[11px] md:text-xs text-slate-400 font-bold">Jan 08, 2026</span>
                                 <div class="share-btn">
                                     <span class="tooltip">Share article</span>
-                                    <button onclick="openShare('Barangay Clean-up Drive')" class="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
-                                        <span class="material-symbols-outlined text-slate-400 text-lg">share</span>
+                                    <button onclick="openShare('Barangay Clean-up Drive')" class="w-8 h-8 md:w-9 md:h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+                                        <span class="material-symbols-outlined text-slate-400 text-base md:text-lg">share</span>
                                     </button>
                                 </div>
                             </div>
@@ -457,58 +460,58 @@
                     </article>
 
                     <!-- Extra News (Hidden by Default) -->
-                    <article class="bg-white rounded-[2rem] overflow-hidden card-shadow card-shadow-hover border border-slate-100 transition-all group news-extra" data-reveal data-delay="100">
-                        <div class="overflow-hidden h-52 bg-gradient-to-br from-violet-100 to-indigo-100 flex items-center justify-center">
+                    <article class="bg-white rounded-[1.5rem] md:rounded-[2rem] overflow-hidden card-shadow card-shadow-hover border border-slate-100 transition-all group news-extra" data-reveal data-delay="100">
+                        <div class="overflow-hidden h-48 md:h-52 bg-gradient-to-br from-violet-100 to-indigo-100 flex items-center justify-center">
                             <span class="material-symbols-outlined text-violet-400" style="font-size:56px;">school</span>
                         </div>
-                        <div class="p-7">
-                            <span class="text-violet-600 text-xs font-bold uppercase tracking-widest mb-2 block" data-en="Education" data-ceb="Edukasyon">Education</span>
-                            <h3 style="font-size:1.1rem; font-weight:800; line-height:1.35;" class="text-slate-900 mb-3 group-hover:text-violet-700 transition-colors" data-en="Free Digital Literacy Program" data-ceb="Libre nga Digital Literacy Program">Free Digital Literacy Program</h3>
-                            <p class="text-slate-500 text-sm leading-relaxed line-clamp-3 mb-6 font-medium" data-en="The city launches free tech training sessions for senior citizens every Tuesday at Barangay halls across Cebu." data-ceb="Naglunsad ang siyudad og libre nga tech training sessions para sa mga matatanda matag Martes sa mga Barangay hall sa tibuok Cebu.">The city launches free tech training sessions for senior citizens every Tuesday at Barangay halls across Cebu.</p>
-                            <div class="flex items-center justify-between pt-5 border-t border-slate-100">
-                                <span class="text-xs text-slate-400 font-bold">Jan 06, 2026</span>
+                        <div class="p-5 md:p-7">
+                            <span class="text-violet-600 text-[11px] md:text-xs font-bold uppercase tracking-widest mb-2 block" data-en="Education" data-ceb="Edukasyon">Education</span>
+                            <h3 class="text-lg md:text-[1.1rem] font-extrabold leading-[1.35] text-slate-900 mb-2 md:mb-3 group-hover:text-violet-700 transition-colors" data-en="Free Digital Literacy Program" data-ceb="Libre nga Digital Literacy Program">Free Digital Literacy Program</h3>
+                            <p class="text-slate-500 text-xs md:text-sm leading-relaxed line-clamp-3 mb-5 md:mb-6 font-medium" data-en="The city launches free tech training sessions for senior citizens every Tuesday at Barangay halls across Cebu." data-ceb="Naglunsad ang siyudad og libre nga tech training sessions para sa mga matatanda matag Martes sa mga Barangay hall sa tibuok Cebu.">The city launches free tech training sessions for senior citizens every Tuesday at Barangay halls across Cebu.</p>
+                            <div class="flex items-center justify-between pt-4 md:pt-5 border-t border-slate-100">
+                                <span class="text-[11px] md:text-xs text-slate-400 font-bold">Jan 06, 2026</span>
                                 <div class="share-btn">
                                     <span class="tooltip">Share article</span>
-                                    <button onclick="openShare('Free Digital Literacy Program')" class="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
-                                        <span class="material-symbols-outlined text-slate-400 text-lg">share</span>
+                                    <button onclick="openShare('Free Digital Literacy Program')" class="w-8 h-8 md:w-9 md:h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+                                        <span class="material-symbols-outlined text-slate-400 text-base md:text-lg">share</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </article>
-                    <article class="bg-white rounded-[2rem] overflow-hidden card-shadow card-shadow-hover border border-slate-100 transition-all group news-extra" data-reveal data-delay="200">
-                        <div class="overflow-hidden h-52 bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
+                    <article class="bg-white rounded-[1.5rem] md:rounded-[2rem] overflow-hidden card-shadow card-shadow-hover border border-slate-100 transition-all group news-extra" data-reveal data-delay="200">
+                        <div class="overflow-hidden h-48 md:h-52 bg-gradient-to-br from-emerald-100 to-teal-100 flex items-center justify-center">
                             <span class="material-symbols-outlined text-emerald-400" style="font-size:56px;">water_drop</span>
                         </div>
-                        <div class="p-7">
-                            <span class="text-emerald-600 text-xs font-bold uppercase tracking-widest mb-2 block" data-en="Environment" data-ceb="Kalikupan">Environment</span>
-                            <h3 style="font-size:1.1rem; font-weight:800; line-height:1.35;" class="text-slate-900 mb-3 group-hover:text-violet-700 transition-colors" data-en="Watershed Restoration Project" data-ceb="Proyekto sa Pagpanumbalik sa Watershed">Watershed Restoration Project</h3>
-                            <p class="text-slate-500 text-sm leading-relaxed line-clamp-3 mb-6 font-medium" data-en="City engineers begin Phase 2 of the Guadalupe River restoration, with 3km of riverbank to be cleaned and reinforced." data-ceb="Ang mga inhinyero sa siyudad nagsugod sa Phase 2 sa pagpanumbalik sa Guadalupe River, nga adunay 3km nga riverbank nga limpyohon ug pahusayon.">City engineers begin Phase 2 of the Guadalupe River restoration, with 3km of riverbank to be cleaned and reinforced.</p>
-                            <div class="flex items-center justify-between pt-5 border-t border-slate-100">
-                                <span class="text-xs text-slate-400 font-bold">Jan 04, 2026</span>
+                        <div class="p-5 md:p-7">
+                            <span class="text-emerald-600 text-[11px] md:text-xs font-bold uppercase tracking-widest mb-2 block" data-en="Environment" data-ceb="Kalikupan">Environment</span>
+                            <h3 class="text-lg md:text-[1.1rem] font-extrabold leading-[1.35] text-slate-900 mb-2 md:mb-3 group-hover:text-violet-700 transition-colors" data-en="Watershed Restoration Project" data-ceb="Proyekto sa Pagpanumbalik sa Watershed">Watershed Restoration Project</h3>
+                            <p class="text-slate-500 text-xs md:text-sm leading-relaxed line-clamp-3 mb-5 md:mb-6 font-medium" data-en="City engineers begin Phase 2 of the Guadalupe River restoration, with 3km of riverbank to be cleaned and reinforced." data-ceb="Ang mga inhinyero sa siyudad nagsugod sa Phase 2 sa pagpanumbalik sa Guadalupe River, nga adunay 3km nga riverbank nga limpyohon ug pahusayon.">City engineers begin Phase 2 of the Guadalupe River restoration, with 3km of riverbank to be cleaned and reinforced.</p>
+                            <div class="flex items-center justify-between pt-4 md:pt-5 border-t border-slate-100">
+                                <span class="text-[11px] md:text-xs text-slate-400 font-bold">Jan 04, 2026</span>
                                 <div class="share-btn">
                                     <span class="tooltip">Share article</span>
-                                    <button onclick="openShare('Watershed Restoration Project')" class="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
-                                        <span class="material-symbols-outlined text-slate-400 text-lg">share</span>
+                                    <button onclick="openShare('Watershed Restoration Project')" class="w-8 h-8 md:w-9 md:h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+                                        <span class="material-symbols-outlined text-slate-400 text-base md:text-lg">share</span>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </article>
-                    <article class="bg-white rounded-[2rem] overflow-hidden card-shadow card-shadow-hover border border-slate-100 transition-all group news-extra" data-reveal data-delay="300">
-                        <div class="overflow-hidden h-52 bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center">
+                    <article class="bg-white rounded-[1.5rem] md:rounded-[2rem] overflow-hidden card-shadow card-shadow-hover border border-slate-100 transition-all group news-extra" data-reveal data-delay="300">
+                        <div class="overflow-hidden h-48 md:h-52 bg-gradient-to-br from-orange-100 to-amber-100 flex items-center justify-center">
                             <span class="material-symbols-outlined text-orange-400" style="font-size:56px;">directions_bus</span>
                         </div>
-                        <div class="p-7">
-                            <span class="text-orange-500 text-xs font-bold uppercase tracking-widest mb-2 block" data-en="Transportation" data-ceb="Transportasyon">Transportation</span>
-                            <h3 style="font-size:1.1rem; font-weight:800; line-height:1.35;" class="text-slate-900 mb-3 group-hover:text-violet-700 transition-colors" data-en="E-Jeepney Pilot Route Expansion" data-ceb="Pagpadako sa E-Jeepney Pilot Route">E-Jeepney Pilot Route Expansion</h3>
-                            <p class="text-slate-500 text-sm leading-relaxed line-clamp-3 mb-6 font-medium" data-en="The modern e-jeepney program now covers 5 additional routes in northern Cebu, reducing commute time by an estimated 25%." data-ceb="Ang modernong e-jeepney program karon nakaabut na sa 5 dugang nga ruta sa amihanang Cebu, nagpagamay sa oras sa biyahe nga tinukmaan.">The modern e-jeepney program now covers 5 additional routes in northern Cebu, reducing commute time by an estimated 25%.</p>
-                            <div class="flex items-center justify-between pt-5 border-t border-slate-100">
-                                <span class="text-xs text-slate-400 font-bold">Jan 02, 2026</span>
+                        <div class="p-5 md:p-7">
+                            <span class="text-orange-500 text-[11px] md:text-xs font-bold uppercase tracking-widest mb-2 block" data-en="Transportation" data-ceb="Transportasyon">Transportation</span>
+                            <h3 class="text-lg md:text-[1.1rem] font-extrabold leading-[1.35] text-slate-900 mb-2 md:mb-3 group-hover:text-violet-700 transition-colors" data-en="E-Jeepney Pilot Route Expansion" data-ceb="Pagpadako sa E-Jeepney Pilot Route">E-Jeepney Pilot Route Expansion</h3>
+                            <p class="text-slate-500 text-xs md:text-sm leading-relaxed line-clamp-3 mb-5 md:mb-6 font-medium" data-en="The modern e-jeepney program now covers 5 additional routes in northern Cebu, reducing commute time by an estimated 25%." data-ceb="Ang modernong e-jeepney program karon nakaabut na sa 5 dugang nga ruta sa amihanang Cebu, nagpagamay sa oras sa biyahe nga tinukmaan.">The modern e-jeepney program now covers 5 additional routes in northern Cebu, reducing commute time by an estimated 25%.</p>
+                            <div class="flex items-center justify-between pt-4 md:pt-5 border-t border-slate-100">
+                                <span class="text-[11px] md:text-xs text-slate-400 font-bold">Jan 02, 2026</span>
                                 <div class="share-btn">
                                     <span class="tooltip">Share article</span>
-                                    <button onclick="openShare('E-Jeepney Pilot Route Expansion')" class="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
-                                        <span class="material-symbols-outlined text-slate-400 text-lg">share</span>
+                                    <button onclick="openShare('E-Jeepney Pilot Route Expansion')" class="w-8 h-8 md:w-9 md:h-9 rounded-full hover:bg-slate-100 flex items-center justify-center transition-colors">
+                                        <span class="material-symbols-outlined text-slate-400 text-base md:text-lg">share</span>
                                     </button>
                                 </div>
                             </div>
@@ -519,22 +522,22 @@
         </section>
 
         <!-- CTA SECTION -->
-        <section class="py-24">
+        <section class="py-16 md:py-24">
             <div class="max-w-4xl mx-auto px-6" data-reveal>
-                <div class="bg-gradient-to-br from-violet-700 to-indigo-800 rounded-[3rem] p-14 md:p-20 text-center text-white relative overflow-hidden shadow-2xl shadow-violet-700/30">
+                <div class="bg-gradient-to-br from-violet-700 to-indigo-800 rounded-[2.5rem] md:rounded-[3rem] p-8 md:p-20 text-center text-white relative overflow-hidden shadow-2xl shadow-violet-700/30">
                     <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image:radial-gradient(#fff 1.5px,transparent 1.5px);background-size:30px 30px;"></div>
                     <div class="relative z-10">
-                        <h2 style="font-size:clamp(1.75rem,4vw,2.5rem); font-weight:800; letter-spacing:-0.02em; line-height:1.2;" class="mb-5" data-en="Ready to join your community?" data-ceb="Andam na bang moapil sa inyong komunidad?">
+                        <h2 class="text-2xl md:text-[2.5rem] font-extrabold tracking-tight leading-[1.2] mb-4 md:mb-5" data-en="Ready to join your community?" data-ceb="Andam na bang moapil sa inyong komunidad?">
                             Ready to join your community?
                         </h2>
-                        <p class="text-violet-100 font-medium text-lg mb-10 max-w-xl mx-auto leading-relaxed" data-en="Create your account today and access barangay documents, emergency alerts, and faster issue reporting." data-ceb="Paghimo og account karon ug i-access ang mga dokumento sa barangay, emergency alerts, ug mas paspas nga pag-report sa mga isyu.">
+                        <p class="text-violet-100 font-medium text-sm md:text-lg mb-8 md:mb-10 max-w-xl mx-auto leading-relaxed" data-en="Create your account today and access barangay documents, emergency alerts, and faster issue reporting." data-ceb="Paghimo og account karon ug i-access ang mga dokumento sa barangay, emergency alerts, ug mas paspas nga pag-report sa mga isyu.">
                             Create your account today and access barangay documents, emergency alerts, and faster issue reporting.
                         </p>
-                        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                            <button onclick="openModal('signupModal')" class="bg-white text-violet-800 px-10 py-4 rounded-2xl font-black text-base hover:bg-slate-50 hover:-translate-y-0.5 transition-all shadow-lg" data-en="Create Account" data-ceb="Paghimo og Account">
+                        <div class="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
+                            <button onclick="openModal('signupModal')" class="w-full sm:w-auto bg-white text-violet-800 px-6 py-3.5 md:px-10 md:py-4 rounded-xl md:rounded-2xl font-black text-sm md:text-base hover:bg-slate-50 hover:-translate-y-0.5 transition-all shadow-lg" data-en="Create Account" data-ceb="Paghimo og Account">
                                 Create Account
                             </button>
-                            <button onclick="handleDownload()" class="bg-violet-900/40 text-white border border-white/20 px-10 py-4 rounded-2xl font-black text-base hover:bg-violet-800 hover:-translate-y-0.5 transition-all" data-en="Download App" data-ceb="I-download ang App">
+                            <button onclick="handleDownload()" class="w-full sm:w-auto bg-violet-900/40 text-white border border-white/20 px-6 py-3.5 md:px-10 md:py-4 rounded-xl md:rounded-2xl font-black text-sm md:text-base hover:bg-violet-800 hover:-translate-y-0.5 transition-all" data-en="Download App" data-ceb="I-download ang App">
                                 Download App
                             </button>
                         </div>
@@ -544,18 +547,18 @@
         </section>
     </main>
 
-    <!-- FULL DETAILED FOOTER (RESTORED & THEMED) -->
-    <footer class="bg-slate-900 border-t border-slate-800 py-20">
+    <!-- FULL DETAILED FOOTER -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-16 md:py-20">
         <div class="max-w-7xl mx-auto px-6">
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-12 mb-16">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-10 md:gap-12 mb-12 md:mb-16">
                 <div class="md:col-span-5" data-reveal>
-                    <div class="flex items-center gap-3 mb-6">
-                        <div style="width:36px;height:36px;background:#6d28d9;border-radius:10px;display:flex;align-items:center;justify-content:center;">
-                            <span class="material-symbols-outlined text-white" style="font-size:20px;">location_city</span>
+                    <div class="flex items-center gap-2.5 mb-5 md:mb-6">
+                        <div style="width:32px;height:32px;background:#6d28d9;border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                            <span class="material-symbols-outlined text-white text-[18px]">location_city</span>
                         </div>
-                        <span style="font-size:1.15rem; font-weight:800; letter-spacing:-0.02em;" class="text-white">BayanihanHub</span>
+                        <span class="text-lg md:text-[1.15rem] font-extrabold tracking-tight text-white">BayanihanHub</span>
                     </div>
-                    <p class="text-slate-400 text-sm leading-relaxed max-w-sm mb-8 font-medium" data-en="Empowering every Cebuano through transparent, accessible, and community-driven digital governance. Built for the people, by the people." data-ceb="Pagpalakas sa matag Cebuano pinaagi sa transparent, accessible, ug community-driven nga digital governance. Gihimo alang sa mga tawo, sa mga tawo.">
+                    <p class="text-slate-400 text-sm leading-relaxed max-w-sm mb-6 md:mb-8 font-medium" data-en="Empowering every Cebuano through transparent, accessible, and community-driven digital governance. Built for the people, by the people." data-ceb="Pagpalakas sa matag Cebuano pinaagi sa transparent, accessible, ug community-driven nga digital governance. Gihimo alang sa mga tawo, sa mga tawo.">
                         Empowering every Cebuano through transparent, accessible, and community-driven digital governance. Built for the people, by the people.
                     </p>
                     <div class="flex gap-3">
@@ -568,37 +571,37 @@
                     </div>
                 </div>
                 <div class="md:col-span-2" data-reveal data-delay="100">
-                    <h4 class="text-white text-xs font-black uppercase tracking-widest mb-6" data-en="Platform" data-ceb="Plataporma">Platform</h4>
-                    <ul class="space-y-4">
-                        <li><a href="#how-it-works" onclick="scrollToSection('how-it-works')" class="text-sm font-medium text-slate-400 hover:text-violet-400 transition-colors" data-en="Service Reports" data-ceb="Mga Service Report">Service Reports</a></li>
-                        <li><a href="#updates" onclick="scrollToSection('updates')" class="text-sm font-medium text-slate-400 hover:text-violet-400 transition-colors" data-en="Public Projects" data-ceb="Mga Pampublikong Proyekto">Public Projects</a></li>
-                        <li><a href="mailto:support@bayanihanhub.cebu" class="text-sm font-medium text-slate-400 hover:text-violet-400 transition-colors" data-en="Help & Support" data-ceb="Tabang ug Suporta">Help & Support</a></li>
+                    <h4 class="text-white text-[11px] md:text-xs font-black uppercase tracking-widest mb-4 md:mb-6" data-en="Platform" data-ceb="Plataporma">Platform</h4>
+                    <ul class="space-y-3 md:space-y-4">
+                        <li><a href="#how-it-works" onclick="scrollToSection('how-it-works')" class="text-xs md:text-sm font-medium text-slate-400 hover:text-violet-400 transition-colors" data-en="Service Reports" data-ceb="Mga Service Report">Service Reports</a></li>
+                        <li><a href="#updates" onclick="scrollToSection('updates')" class="text-xs md:text-sm font-medium text-slate-400 hover:text-violet-400 transition-colors" data-en="Public Projects" data-ceb="Mga Pampublikong Proyekto">Public Projects</a></li>
+                        <li><a href="mailto:support@bayanihanhub.cebu" class="text-xs md:text-sm font-medium text-slate-400 hover:text-violet-400 transition-colors" data-en="Help & Support" data-ceb="Tabang ug Suporta">Help & Support</a></li>
                     </ul>
                 </div>
                 <div class="md:col-span-2" data-reveal data-delay="200">
-                    <h4 class="text-white text-xs font-black uppercase tracking-widest mb-6" data-en="Legal" data-ceb="Legal">Legal</h4>
-                    <ul class="space-y-4">
-                        <li><a href="#" onclick="showToast('Terms of Service coming soon.','info');return false;" class="text-sm font-medium text-slate-400 hover:text-violet-400 transition-colors" data-en="Terms of Service" data-ceb="Mga Termino sa Serbisyo">Terms of Service</a></li>
-                        <li><a href="#" onclick="showToast('Privacy Policy coming soon.','info');return false;" class="text-sm font-medium text-slate-400 hover:text-violet-400 transition-colors" data-en="Privacy Policy" data-ceb="Patakaran sa Privacy">Privacy Policy</a></li>
-                        <li><a href="#" onclick="showToast('Transparency Seal coming soon.','info');return false;" class="text-sm font-medium text-slate-400 hover:text-violet-400 transition-colors" data-en="Transparency Seal" data-ceb="Transparency Seal">Transparency Seal</a></li>
+                    <h4 class="text-white text-[11px] md:text-xs font-black uppercase tracking-widest mb-4 md:mb-6" data-en="Legal" data-ceb="Legal">Legal</h4>
+                    <ul class="space-y-3 md:space-y-4">
+                        <li><a href="#" onclick="showToast('Terms of Service coming soon.','info');return false;" class="text-xs md:text-sm font-medium text-slate-400 hover:text-violet-400 transition-colors" data-en="Terms of Service" data-ceb="Mga Termino sa Serbisyo">Terms of Service</a></li>
+                        <li><a href="#" onclick="showToast('Privacy Policy coming soon.','info');return false;" class="text-xs md:text-sm font-medium text-slate-400 hover:text-violet-400 transition-colors" data-en="Privacy Policy" data-ceb="Patakaran sa Privacy">Privacy Policy</a></li>
+                        <li><a href="#" onclick="showToast('Transparency Seal coming soon.','info');return false;" class="text-xs md:text-sm font-medium text-slate-400 hover:text-violet-400 transition-colors" data-en="Transparency Seal" data-ceb="Transparency Seal">Transparency Seal</a></li>
                     </ul>
                 </div>
-                <div class="md:col-span-3" data-reveal data-delay="300">
-                    <h4 class="text-white text-xs font-black uppercase tracking-widest mb-6" data-en="Contact" data-ceb="Kontak">Contact</h4>
-                    <div class="space-y-4">
-                        <p class="text-sm text-slate-400 font-medium flex items-start gap-2.5 leading-relaxed">
+                <div class="md:col-span-3 sm:col-span-2" data-reveal data-delay="300">
+                    <h4 class="text-white text-[11px] md:text-xs font-black uppercase tracking-widest mb-4 md:mb-6" data-en="Contact" data-ceb="Kontak">Contact</h4>
+                    <div class="space-y-3 md:space-y-4">
+                        <p class="text-xs md:text-sm text-slate-400 font-medium flex items-start gap-2.5 leading-relaxed">
                             <span class="material-symbols-outlined text-slate-500 text-lg mt-0.5 shrink-0">location_on</span>
                             Cebu City Hall, No. 1 SRP Coastal Rd., Cebu City, 6000 Philippines
                         </p>
-                        <a href="mailto:support@bayanihanhub.cebu" class="text-sm text-violet-400 font-bold flex items-center gap-2 hover:underline">
+                        <a href="mailto:support@bayanihanhub.cebu" class="text-xs md:text-sm text-violet-400 font-bold flex items-center gap-2 hover:underline">
                             <span class="material-symbols-outlined text-lg">mail</span>
                             support@bayanihanhub.cebu
                         </a>
                     </div>
                 </div>
             </div>
-            <div class="pt-8 border-t border-slate-800 flex justify-center">
-                <p class="text-xs font-medium text-slate-500">© 2026 BayanihanHub. Proudly serving the people of Cebu.</p>
+            <div class="pt-6 md:pt-8 border-t border-slate-800 flex justify-center text-center">
+                <p class="text-[10px] md:text-xs font-medium text-slate-500">© 2026 BayanihanHub. Proudly serving the people of Cebu.</p>
             </div>
         </div>
     </footer>
@@ -642,7 +645,7 @@
             }
         }
 
-        // RESTORED: Toggle All News
+        // Toggle All News
         let isNewsExpanded = false;
         function toggleAllNews() {
             const extraNews = document.querySelectorAll('.news-extra');
@@ -659,7 +662,7 @@
             icon.innerText = isNewsExpanded ? 'arrow_drop_up' : 'arrow_right_alt';
         }
 
-        // ─── 3. AUTHENTICATION LOGIC (HACKATHON MAGIC INCLUDED) ──────────
+        // ─── 3. AUTHENTICATION LOGIC ──────────
 
         async function handleLogin(e) {
             e.preventDefault();
@@ -745,7 +748,7 @@
             } catch (e) { showToast('Verification failed.', 'error'); }
         }
 
-        // ─── 4. GENERAL UTILITIES (MODALS, LANG, TOAST, SHARE) ───────────
+        // ─── 4. GENERAL UTILITIES ───────────
 
         let currentLang = 'en';
         function setLang(lang) {
@@ -753,8 +756,8 @@
             document.querySelectorAll('[data-en]').forEach(el => {
                 el.innerHTML = el.getAttribute('data-' + lang) || el.getAttribute('data-en');
             });
-            document.getElementById('btnEng').className = lang === 'en' ? 'px-4 py-1.5 rounded-full text-xs font-black bg-white text-violet-700 shadow-sm transition-all' : 'px-4 py-1.5 rounded-full text-xs font-black text-slate-400 hover:text-slate-800 transition-all';
-            document.getElementById('btnCeb').className = lang === 'ceb' ? 'px-4 py-1.5 rounded-full text-xs font-black bg-white text-violet-700 shadow-sm transition-all' : 'px-4 py-1.5 rounded-full text-xs font-black text-slate-400 hover:text-slate-800 transition-all';
+            document.getElementById('btnEng').className = lang === 'en' ? 'px-3 md:px-4 py-1.5 rounded-full text-[11px] md:text-xs font-black bg-white text-violet-700 shadow-sm transition-all' : 'px-3 md:px-4 py-1.5 rounded-full text-[11px] md:text-xs font-black text-slate-400 hover:text-slate-800 transition-all';
+            document.getElementById('btnCeb').className = lang === 'ceb' ? 'px-3 md:px-4 py-1.5 rounded-full text-[11px] md:text-xs font-black bg-white text-violet-700 shadow-sm transition-all' : 'px-3 md:px-4 py-1.5 rounded-full text-[11px] md:text-xs font-black text-slate-400 hover:text-slate-800 transition-all';
             showToast(lang === 'en' ? 'Switched to English' : 'Gibag-o sa Cebuano', 'success');
         }
 
@@ -789,7 +792,6 @@
             if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
-        // RESTORED: Share Modal Logic
         function openShare(title) {
             document.getElementById('shareArticleTitle').textContent = title;
             openModal('shareModal');
@@ -799,7 +801,6 @@
             setTimeout(() => closeModal('shareModal'), 1000);
         }
 
-        // RESTORED: Download App Button Logic
         function handleDownload() {
             showToast('Mobile App is coming soon to iOS & Android! 📱', 'info');
         }
