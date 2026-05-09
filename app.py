@@ -1,3 +1,4 @@
+import os
 import threading
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -13,9 +14,9 @@ from functools import wraps
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
 # --- CONFIGURATION ---
-app.secret_key = 'bayanihan_hub_secret_key_2026'
-GMAIL_USER = 'noreply.bayanihanhub@gmail.com' 
-GMAIL_PASS = 'fjom yntw wsca nlhf'       
+app.secret_key = os.environ.get('SECRET_KEY', 'bayanihan_hub_secret_key_2026')
+GMAIL_USER = os.environ.get('MAIL_USERNAME', 'noreply.bayanihanhub@gmail.com') 
+GMAIL_PASS = os.environ.get('MAIL_PASSWORD', 'fjom yntw wsca nlhf')       
 
 # --- DATABASE SETUP ---
 def get_db_connection():
