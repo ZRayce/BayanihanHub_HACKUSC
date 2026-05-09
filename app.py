@@ -172,7 +172,8 @@ def send_otp():
                 else:
                     print(f"⚠️ EMAIL FAILED. Use backup code: {code}")
 
-        threading.Thread(target=run_email_in_thread, args=(app._get_current_object(), email, otp_code)).start()
+        # ✅ FIX APPLIED HERE: Binago ko ang app._get_current_object() sa app
+        threading.Thread(target=run_email_in_thread, args=(app, email, otp_code)).start()
 
         return jsonify({"message": "OTP generated! Check your email."}), 200
     except Exception as e:
@@ -262,7 +263,8 @@ def forgot_password():
             with app_instance.app_context():
                 send_email_otp(target_email, code, "Reset Password Code")
 
-        threading.Thread(target=run_email_in_thread, args=(app._get_current_object(), email, otp_code)).start() 
+        # ✅ FIX APPLIED HERE: Binago ko ang app._get_current_object() sa app
+        threading.Thread(target=run_email_in_thread, args=(app, email, otp_code)).start() 
 
         return jsonify({"message": "Reset code sent!"}), 200
     except Exception as e:
