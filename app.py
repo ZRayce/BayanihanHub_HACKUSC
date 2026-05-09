@@ -25,6 +25,7 @@ def get_db_connection():
 
 def init_db():
     conn = get_db_connection()
+    # Users Table
     conn.execute('''
         CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,6 +37,7 @@ def init_db():
             hero_points INTEGER DEFAULT 0
         )
     ''')
+    # OTP Requests Table
     conn.execute('''
         CREATE TABLE IF NOT EXISTS otp_requests (
             phone_number TEXT PRIMARY KEY,
@@ -43,6 +45,7 @@ def init_db():
             temp_data TEXT NOT NULL
         )
     ''')
+    # Reports Table
     conn.execute('''
         CREATE TABLE IF NOT EXISTS reports (
             report_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -117,7 +120,7 @@ def send_email_otp(receiver_email, otp):
         """
         msg.attach(MIMEText(html, 'html'))
         
-        # Using SSL (Port 465) for better compatibility with Render
+        # SSL Port 465 is more reliable on Render/Cloud environments
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
             server.login(GMAIL_USER, GMAIL_PASS)
             server.sendmail(GMAIL_USER, receiver_email, msg.as_string())
@@ -143,7 +146,7 @@ def send_otp():
     
     otp_code = str(random.randint(100000, 999999))
 
-    # --- HACKATHON BACKUP LOGGING ---
+    # --- HACKATHON BACKUP LOGGING (Check Render logs for this!) ---
     print(f"\n🚀 [DEMO LOG] OTP FOR {email}: {otp_code}\n")
 
     try:
@@ -153,14 +156,14 @@ def send_otp():
         conn.commit()
         conn.close()
 
-        # Run email in background thread to keep UI fast
+        # Background Threading for Email
         def run_email_in_thread(app_instance, target_email, code):
             with app_instance.app_context():
                 success = send_email_otp(target_email, code)
                 if success:
                     print(f"✅ EMAIL SENT to {target_email}")
                 else:
-                    print(f"⚠️ EMAIL FAILED but check terminal for backup code.")
+                    print(f"⚠️ EMAIL FAILED. Use backup code: {code}")
 
         threading.Thread(target=run_email_in_thread, args=(app._get_current_object(), email, otp_code)).start()
 
@@ -175,41 +178,29 @@ def verify_otp():
     user_code = data.get('code')
     
     # 🔥 HACKATHON MASTER BYPASS (LIFESAVER!)
-    if user_code == '123456':
-        conn = get_db_connection()
-        record = conn.execute('SELECT * FROM otp_requests WHERE phone_number = ?', (phone,)).fetchone()
-        if record:
-            user_details = json.loads(record['temp_data'])
-            hashed_pw = generate_password_hash(user_details['password'])
-            try:
-                conn.execute('INSERT OR IGNORE INTO users (full_name, email, phone_number, password_hash, role) VALUES (?, ?, ?, ?, "citizen")',
-                             (user_details['name'], user_details['email'], phone, hashed_pw))
-                conn.commit()
-                # Get the actual user_id
-                user = conn.execute('SELECT user_id FROM users WHERE phone_number = ?', (phone,)).fetchone()
-                session['user_id'] = user['user_id']
-                session['role'] = 'citizen'
-                conn.close()
-                return jsonify({"message": "Success", "redirect_url": "/user-dashboard"}), 200
-            except:
-                pass
-        conn.close()
+    # Logic: If 123456 is used, it attempts to register the user from the last temp_data
+    is_bypass = (user_code == '123456')
 
-    # Normal Logic
     conn = get_db_connection()
     record = conn.execute('SELECT * FROM otp_requests WHERE phone_number = ?', (phone,)).fetchone()
     
-    if record and record['otp_code'] == user_code:
+    if record and (record['otp_code'] == user_code or is_bypass):
         user_details = json.loads(record['temp_data'])
         hashed_pw = generate_password_hash(user_details['password'])
         try:
-            conn.execute('INSERT INTO users (full_name, email, phone_number, password_hash, role) VALUES (?, ?, ?, ?, "citizen")',
+            # Register the user
+            conn.execute('INSERT OR IGNORE INTO users (full_name, email, phone_number, password_hash, role) VALUES (?, ?, ?, ?, "citizen")',
                          (user_details['name'], user_details['email'], phone, hashed_pw))
+            
+            # Clean up the OTP request
             conn.execute('DELETE FROM otp_requests WHERE phone_number = ?', (phone,))
             conn.commit()
-            user = conn.execute('SELECT user_id FROM users WHERE phone_number = ?', (phone,)).fetchone()
+            
+            # Auto-login after registration
+            user = conn.execute('SELECT user_id, role FROM users WHERE phone_number = ?', (phone,)).fetchone()
             session['user_id'] = user['user_id']
-            session['role'] = 'citizen'
+            session['role'] = user['role']
+            
             conn.close()
             return jsonify({"message": "Success", "redirect_url": "/user-dashboard"}), 200
         except sqlite3.IntegrityError:
@@ -237,14 +228,11 @@ def login():
     
     return jsonify({"error": "Incorrect email or password."}), 401
 
-# --- BLUEPRINTS & ERRORS ---
+# --- BLUEPRINTS ---
 from user import user_bp
 app.register_blueprint(user_bp)
 
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html'), 404
-
+# --- UTILITY ROUTES ---
 @app.route('/api/logout')
 def logout():
     session.clear()
@@ -259,6 +247,10 @@ def admin_dashboard():
     user = conn.execute('SELECT * FROM users WHERE user_id = ?', (session['user_id'],)).fetchone()
     conn.close()
     return render_template('Admin_Dashboard.html', user=user)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 if __name__ == '__main__':
     app.run(debug=True)
