@@ -1,19 +1,18 @@
 import os
 import threading
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-from werkzeug.security import generate_password_hash, check_password_hash
-import email
 import sqlite3
 import random
 import json
 import smtplib
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, current_app
+from werkzeug.security import generate_password_hash, check_password_hash
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from functools import wraps
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
-# --- CONFIGURATION ---
+# --- CONFIGURATION (Render Friendly) ---
 app.secret_key = os.environ.get('SECRET_KEY', 'bayanihan_hub_secret_key_2026')
 GMAIL_USER = os.environ.get('MAIL_USERNAME', 'noreply.bayanihanhub@gmail.com') 
 GMAIL_PASS = os.environ.get('MAIL_PASSWORD', 'fjom yntw wsca nlhf')       
@@ -26,7 +25,6 @@ def get_db_connection():
 
 def init_db():
     conn = get_db_connection()
-    # 1. Create Tables
     conn.execute('''
         CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,8 +43,6 @@ def init_db():
             temp_data TEXT NOT NULL
         )
     ''')
-
-    # 3. Create Reports Table
     conn.execute('''
         CREATE TABLE IF NOT EXISTS reports (
             report_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,13 +60,12 @@ def init_db():
     # --- ROOT ADMIN SETUP ---
     ADMIN_EMAIL = 'admin.bayanihanhub@cebu.gov.ph' 
     ADMIN_PASS = 'Bayanihan_Secure_2026!' 
-    ADMIN_PHONE = '0000' # Admin default phone
+    ADMIN_PHONE = '0000'
 
-    # Check if admin already exists by role to avoid IntegrityError
     admin = conn.execute("SELECT * FROM users WHERE role = 'official'").fetchone()
+    hashed_pw = generate_password_hash(ADMIN_PASS)
     
     if not admin:
-        hashed_pw = generate_password_hash(ADMIN_PASS)
         try:
             conn.execute('''
                 INSERT INTO users (full_name, email, phone_number, password_hash, role) 
@@ -79,20 +74,16 @@ def init_db():
             conn.commit()
             print(f"⭐ [SYSTEM] Root Admin Created: {ADMIN_EMAIL}")
         except sqlite3.IntegrityError:
-            print("⚠️ [SYSTEM] Integrity Check: Admin already in database.")
+            pass
     else:
-        # Piliting i-update ang password tuwing mag-re-restart ang server
-        hashed_pw = generate_password_hash(ADMIN_PASS)
         conn.execute('UPDATE users SET password_hash = ? WHERE email = ?', (hashed_pw, ADMIN_EMAIL))
         conn.commit()
-        print(f"✅ [SYSTEM] Admin Account Ready & Password Force-Updated: {admin['email']}")
     
     conn.close()
 
-# Run database initialization
 init_db()
 
-# --- LOGIN PROTECTION DECORATOR ---
+# --- LOGIN PROTECTION ---
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -101,34 +92,38 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# --- EMAIL SENDER FUNCTION ---
+# --- PRODUCTION EMAIL SENDER ---
 def send_email_otp(receiver_email, otp):
     try:
         msg = MIMEMultipart('alternative')
         msg['Subject'] = f'Verification Code: {otp}'
         msg['From'] = f'"BayanihanHub Official" <{GMAIL_USER}>'
         msg['To'] = receiver_email
+        
         html = f"""
         <html>
-          <body style="font-family: Arial, sans-serif; color: #0f172a; background-color: #f8fafc; padding: 20px;">
-            <div style="max-width: 500px; margin: auto; background: white; border-radius: 24px; overflow: hidden; border: 1px solid #e2e8f0;">
-              <div style="background-color: #1d4ed8; padding: 30px; text-align: center;"><h1 style="color: white; margin: 0; font-size: 24px;">BayanihanHub</h1></div>
+          <body style="font-family: Arial, sans-serif; background-color: #f8fafc; padding: 20px;">
+            <div style="max-width: 500px; margin: auto; background: white; border-radius: 24px; border: 1px solid #e2e8f0; overflow: hidden;">
+              <div style="background-color: #6d28d9; padding: 30px; text-align: center;"><h1 style="color: white; margin: 0;">BayanihanHub</h1></div>
               <div style="padding: 40px; text-align: center;">
-                <h2 style="font-size: 20px; margin-bottom: 8px;">Maayong adlaw!</h2>
-                <p style="color: #64748b; font-size: 14px;">Gamita kini nga code para ma-verify ang imong account.</p>
-                <div style="background-color: #f1f5f9; padding: 20px; border-radius: 16px; margin: 24px 0; font-size: 32px; font-weight: 800; letter-spacing: 8px; color: #1d4ed8; border: 1px dashed #cbd5e1;">{otp}</div>
+                <h2 style="color: #1e293b;">Maayong adlaw!</h2>
+                <p style="color: #64748b;">Gamita kini nga code para ma-verify ang imong account:</p>
+                <div style="background-color: #f1f5f9; padding: 20px; border-radius: 16px; margin: 24px 0; font-size: 32px; font-weight: 800; letter-spacing: 8px; color: #6d28d9; border: 1px dashed #cbd5e1;">{otp}</div>
+                <p style="font-size: 12px; color: #94a3b8;">If you didn't request this, please ignore this email.</p>
               </div>
             </div>
           </body>
         </html>
         """
         msg.attach(MIMEText(html, 'html'))
+        
+        # Using SSL (Port 465) for better compatibility with Render
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
             server.login(GMAIL_USER, GMAIL_PASS)
             server.sendmail(GMAIL_USER, receiver_email, msg.as_string())
         return True
     except Exception as e:
-        print(f"Email Error: {e}")
+        print(f"❌ SMTP Error Detail: {e}")
         return False
 
 # --- ROUTES ---
@@ -148,9 +143,8 @@ def send_otp():
     
     otp_code = str(random.randint(100000, 999999))
 
-    print("\n" + "="*40)
-    print(f"🚀 [BACKUP] OTP FOR {email} IS: {otp_code}")
-    print("="*40 + "\n")
+    # --- HACKATHON BACKUP LOGGING ---
+    print(f"\n🚀 [DEMO LOG] OTP FOR {email}: {otp_code}\n")
 
     try:
         conn = get_db_connection()
@@ -159,31 +153,49 @@ def send_otp():
         conn.commit()
         conn.close()
 
-        from flask import current_app
-        app_ctx = current_app.app_context()
+        # Run email in background thread to keep UI fast
+        def run_email_in_thread(app_instance, target_email, code):
+            with app_instance.app_context():
+                success = send_email_otp(target_email, code)
+                if success:
+                    print(f"✅ EMAIL SENT to {target_email}")
+                else:
+                    print(f"⚠️ EMAIL FAILED but check terminal for backup code.")
 
-        def run_email_in_thread(ctx, target_email, code):
-            with ctx:
-                try:
-                    send_email_otp(target_email, code)
-                    print(f"✅ SUCCESS: OTP sent to {target_email} in background!")
-                except Exception as e:
-                    print(f"❌ ERROR: Failed to send OTP email: {e}")
+        threading.Thread(target=run_email_in_thread, args=(app._get_current_object(), email, otp_code)).start()
 
-        email_thread = threading.Thread(target=run_email_in_thread, args=(app_ctx, email, otp_code))
-        email_thread.start() 
-
-        return jsonify({"message": "OTP generated! Check email or terminal."}), 200
-
+        return jsonify({"message": "OTP generated! Check your email."}), 200
     except Exception as e:
-        return jsonify({"error": "Failed to process request."}), 500
-            
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/api/verify-otp', methods=['POST'])
 def verify_otp():
     data = request.json
     phone = data.get('phone')
     user_code = data.get('code')
     
+    # 🔥 HACKATHON MASTER BYPASS (LIFESAVER!)
+    if user_code == '123456':
+        conn = get_db_connection()
+        record = conn.execute('SELECT * FROM otp_requests WHERE phone_number = ?', (phone,)).fetchone()
+        if record:
+            user_details = json.loads(record['temp_data'])
+            hashed_pw = generate_password_hash(user_details['password'])
+            try:
+                conn.execute('INSERT OR IGNORE INTO users (full_name, email, phone_number, password_hash, role) VALUES (?, ?, ?, ?, "citizen")',
+                             (user_details['name'], user_details['email'], phone, hashed_pw))
+                conn.commit()
+                # Get the actual user_id
+                user = conn.execute('SELECT user_id FROM users WHERE phone_number = ?', (phone,)).fetchone()
+                session['user_id'] = user['user_id']
+                session['role'] = 'citizen'
+                conn.close()
+                return jsonify({"message": "Success", "redirect_url": "/user-dashboard"}), 200
+            except:
+                pass
+        conn.close()
+
+    # Normal Logic
     conn = get_db_connection()
     record = conn.execute('SELECT * FROM otp_requests WHERE phone_number = ?', (phone,)).fetchone()
     
@@ -195,11 +207,15 @@ def verify_otp():
                          (user_details['name'], user_details['email'], phone, hashed_pw))
             conn.execute('DELETE FROM otp_requests WHERE phone_number = ?', (phone,))
             conn.commit()
+            user = conn.execute('SELECT user_id FROM users WHERE phone_number = ?', (phone,)).fetchone()
+            session['user_id'] = user['user_id']
+            session['role'] = 'citizen'
             conn.close()
             return jsonify({"message": "Success", "redirect_url": "/user-dashboard"}), 200
         except sqlite3.IntegrityError:
             conn.close()
             return jsonify({"error": "User already exists"}), 400
+            
     conn.close()
     return jsonify({"error": "Invalid code"}), 400
 
@@ -221,118 +237,28 @@ def login():
     
     return jsonify({"error": "Incorrect email or password."}), 401
 
-@app.route('/api/forgot-password', methods=['POST'])
-def forgot_password():
-    data = request.json
-    email = data.get('email')
-        
-    conn = get_db_connection()
-    user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
-        
-    if not user:
-        conn.close()
-        return jsonify({"error": "Hindi namin mahanap ang email na ito."}), 404
-            
-    otp_code = str(random.randint(100000, 999999))
-        
-    print("\n" + "="*40)
-    print(f"🔑 [PASSWORD RESET] OTP FOR {email}: {otp_code}")
-    print("="*40 + "\n")
-    
-    try:
-        conn.execute('INSERT OR REPLACE INTO otp_requests (phone_number, otp_code, temp_data) VALUES (?, ?, ?)',
-                     (email, otp_code, 'reset_password'))
-        conn.commit()
-        conn.close()
-            
-        from flask import current_app
-        app_ctx = current_app.app_context()
+# --- BLUEPRINTS & ERRORS ---
+from user import user_bp
+app.register_blueprint(user_bp)
 
-        def run_email_in_thread(ctx, target_email, code):
-            with ctx:
-                try:
-                    send_email_otp(target_email, code)
-                    print(f"✅ SUCCESS: Reset code sent to {target_email} in background!")
-                except Exception as e:
-                    print(f"❌ ERROR: Failed to send reset email: {e}")
-
-        email_thread = threading.Thread(target=run_email_in_thread, args=(app_ctx, email, otp_code))
-        email_thread.start() 
-
-        return jsonify({"message": "Reset code sent!"}), 200
-    
-    except Exception as e:
-        return jsonify({"error": "Failed to generate reset code."}), 500
-
-@app.route('/api/reset-password', methods=['POST'])
-def reset_password():
-    data = request.json
-    email = data.get('email')
-    code = data.get('code')
-    new_password = data.get('new_password')
-        
-    conn = get_db_connection()
-    record = conn.execute('SELECT * FROM otp_requests WHERE phone_number = ?', (email,)).fetchone()
-        
-    if record and record['otp_code'] == code and record['temp_data'] == 'reset_password':
-        hashed_pw = generate_password_hash(new_password)
-        conn.execute('UPDATE users SET password_hash = ? WHERE email = ?', (hashed_pw, email))
-        conn.execute('DELETE FROM otp_requests WHERE phone_number = ?', (email,))
-        conn.commit()
-        conn.close()
-        return jsonify({"message": "Password updated successfully!"}), 200
-        
-    conn.close()
-    return jsonify({"error": "Invalid or expired code."}), 400
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 @app.route('/api/logout')
 def logout():
     session.clear()
     return redirect(url_for('home'))
 
-# --- DASHBOARDS ---
-
 @app.route('/admin-dashboard')
 @login_required
 def admin_dashboard():
+    if session.get('role') != 'official':
+        return redirect(url_for('home'))
     conn = get_db_connection()
     user = conn.execute('SELECT * FROM users WHERE user_id = ?', (session['user_id'],)).fetchone()
     conn.close()
-    
     return render_template('Admin_Dashboard.html', user=user)
-
-# --- ADMIN STATUS UPDATE API ---
-@app.route('/api/update-status', methods=['POST'])
-@login_required
-def update_status():
-    if session.get('role') != 'official':
-        return jsonify({"error": "Unauthorized"}), 403
-        
-    data = request.json
-    report_id = data.get('report_id')
-    new_status = data.get('status')
-    
-    try:
-        conn = get_db_connection()
-        conn.execute('UPDATE reports SET status = ? WHERE report_id = ?', (new_status, report_id))
-        conn.commit()
-        conn.close()
-        return jsonify({"message": "Status updated!"}), 200
-    except Exception as e:
-        return jsonify({"error": "Database error"}), 500
-
-# --- REGISTER BLUEPRINTS ---
-from user import user_bp
-app.register_blueprint(user_bp)
-
-# --- ERROR HANDLERS ---
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html'), 404
-
-@app.errorhandler(500)
-def internal_server_error(e):
-    return render_template('500.html'), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
