@@ -1,262 +1,108 @@
-<script>
-    // ── Scroll-reveal ────────────────────────────────────────
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-    document.querySelectorAll('[data-reveal]').forEach(el => observer.observe(el));
+# 🌟 BayanihanHub
 
-    // ── Smooth scroll ────────────────────────────────────────
-    function scrollToSection(id) {
-      const el = document.getElementById(id);
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
+<div align="center">
+  <img src="static/Images/BAYANIHANHUB_LOGO.png" alt="BayanihanHub Logo" width="150"/>
+  <br>
+  <strong>Empowering the Heart of Cebu through Transparent, Accessible, and Community-Driven Digital Governance.</strong>
+  <br><br>
+  
+  [![Python](https://img.shields.io/badge/Python-3.x-6d28d9.svg?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+  [![Flask](https://img.shields.io/badge/Flask-Backend-black.svg?style=flat-square&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+  [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-Frontend-38B2AC.svg?style=flat-square&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+  [![Status](https://img.shields.io/badge/Status-HackUSC_MVP-success.svg?style=flat-square)](#)
+</div>
 
-    // ── Language toggle ──────────────────────────────────────
-    let currentLang = 'en';
-    function setLang(lang) {
-      currentLang = lang;
-      document.querySelectorAll('[data-en]').forEach(el => {
-        el.innerHTML = el.getAttribute('data-' + lang) || el.getAttribute('data-en');
-      });
-      // Toggle button styles
-      document.getElementById('btnEng').className = lang === 'en'
-        ? 'px-4 py-1.5 rounded-full text-xs font-bold bg-white text-blue-700 shadow-sm transition-all'
-        : 'px-4 py-1.5 rounded-full text-xs font-bold text-slate-500 hover:text-slate-800 transition-all';
-      document.getElementById('btnCeb').className = lang === 'ceb'
-        ? 'px-4 py-1.5 rounded-full text-xs font-bold bg-white text-blue-700 shadow-sm transition-all'
-        : 'px-4 py-1.5 rounded-full text-xs font-bold text-slate-500 hover:text-slate-800 transition-all';
-      showToast(lang === 'en' ? 'Switched to English' : 'Gibag-o sa Cebuano', 'success');
-    }
+---
 
-    // ── Modal helpers ────────────────────────────────────────
-    function openModal(id) {
-      document.getElementById(id).classList.add('active');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeModal(id) {
-      document.getElementById(id).classList.remove('active');
-      document.body.style.overflow = '';
-    }
-    // Close on overlay click
-    document.querySelectorAll('.modal-overlay').forEach(overlay => {
-      overlay.addEventListener('click', function(e) {
-        if (e.target === this) closeModal(this.id);
-      });
-    });
-    // Close on Escape
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        document.querySelectorAll('.modal-overlay.active').forEach(m => closeModal(m.id));
-      }
-    });
+## 📖 About The Project
 
-    // ── Signup form ──────────────────────────────────────────
-    function handleSignup() {
-      const inputs = document.querySelectorAll('#signupModal .inp');
-      let valid = true;
-      inputs.forEach(inp => {
-        inp.style.borderColor = '';
-        if (!inp.value.trim()) { inp.style.borderColor = '#f87171'; valid = false; }
-      });
-      if (!valid) { showToast('Please fill in all fields.', 'error'); return; }
-      const emailEl = document.querySelector('#signupModal input[type="email"]');
-      if (emailEl && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailEl.value)) {
-        emailEl.style.borderColor = '#f87171';
-        showToast('Please enter a valid email address.', 'error');
-        return;
-      }
-      closeModal('signupModal');
-      showToast('Account created! Welcome to BayaniHub 🎉', 'success');
-    }
+**BayanihanHub** bridges the gap between citizens and their Local Government Units (LGUs). In many communities, reporting issues like broken streetlights, uncollected garbage, or potholes is a tedious process with zero transparency. 
 
-    // ── Share ────────────────────────────────────────────────
-    let currentShareTitle = '';
-    function openShare(title) {
-      currentShareTitle = title;
-      document.getElementById('shareArticleTitle').textContent = title;
-      openModal('shareModal');
-    }
-    function shareVia(platform) {
-      const url = encodeURIComponent(window.location.href);
-      const text = encodeURIComponent('Check this out: ' + currentShareTitle + ' — BayaniHub Cebu');
-      if (platform === 'facebook') {
-        window.open('https://www.facebook.com/sharer/sharer.php?u=' + url, '_blank', 'width=600,height=400');
-      } else if (platform === 'twitter') {
-        window.open('https://twitter.com/intent/tweet?text=' + text + '&url=' + url, '_blank', 'width=600,height=400');
-      } else if (platform === 'copy') {
-        navigator.clipboard.writeText(window.location.href).then(() => {
-          closeModal('shareModal');
-          showToast('Link copied to clipboard!', 'success');
-        }).catch(() => {
-          closeModal('shareModal');
-          showToast('Link copied!', 'success');
-        });
-        return;
-      }
-      closeModal('shareModal');
-      showToast('Opening share window…', 'info');
-    }
+We solve this by transforming passive residents into active community heroes. Through our platform, citizens can easily snap and report local issues. To drive massive user adoption, we introduced a **Gamification System** where users earn "Hero Points" for valid reports. These points can be redeemed for real-world goods (like rice, canned goods, or GCash) at the virtual **Bayanihan Sari-Sari Store**.
 
-    // ── View All News ────────────────────────────────────────
-    let newsExpanded = false;
-    function toggleAllNews() {
-      newsExpanded = !newsExpanded;
-      const extras = document.querySelectorAll('.news-extra');
-      const label = document.getElementById('viewAllLabel');
-      const icon = document.getElementById('viewAllIcon');
-      extras.forEach(card => {
-        card.classList.toggle('visible', newsExpanded);
-        // Re-trigger reveal animation
-        if (newsExpanded) {
-          card.classList.remove('is-visible');
-          setTimeout(() => observer.observe(card), 50);
-        }
-      });
-      label.textContent = newsExpanded
-        ? (currentLang === 'ceb' ? 'Ipakita Diyutay' : 'Show Less')
-        : (currentLang === 'ceb' ? 'Tan-awa Tanan nga Balita' : 'View All News');
-      icon.textContent = newsExpanded ? 'expand_less' : 'arrow_right_alt';
-    }
+Meanwhile, the **Barangay Command Center** (Admin) receives a bird's-eye view of all incidents, allowing them to dispatch engineering or sanitation teams efficiently and maintain a public transparency ledger.
 
-    // ── Step detail info ─────────────────────────────────────
-    const stepInfo = {
-      1: { en: 'Open the BayaniHub app, tap "Report Issue", snap a photo of the problem, choose a category (Roads, Flooding, Waste, etc.), and hit Submit. Your report is geotagged automatically.', ceb: 'Ablihan ang BayaniHub app, i-tap ang "I-report ang Isyu", kumuha og litrato sa problema, pilia ang kategorya, ug i-submit. Ang inyong report awtomatiko nga geotagged.' },
-      2: { en: 'Your report goes to the Barangay dashboard. You\'ll get push notifications at every status change: Received → Under Review → In Progress → Done.', ceb: 'Ang inyong report moadto sa Barangay dashboard. Makadawat ka og push notifications sa matag pagbabago sa status: Nadawat → Gireview → Gibuhat → Nahuman.' },
-      3: { en: 'Once fixed, barangay officials upload a "resolved" photo. You\'ll be notified instantly and can rate the response. Your feedback shapes future service.', ceb: 'Sa dihang nahuman na, nag-upload ang mga opisyal og "resolved" nga litrato. Dayon ikaw abisohon ug makagrado sa tubag. Ang inyong feedback makatabang sa umaabot nga serbisyo.' }
-    };
-    function showStepDetail(step) {
-      const info = stepInfo[step][currentLang] || stepInfo[step]['en'];
-      showToast(info, 'info');
-    }
+---
 
-    // ── Download app ─────────────────────────────────────────
-    function handleDownload() {
-      showToast('App coming soon to iOS & Android! 📱', 'info');
-    }
+## ✨ Key Features
 
-    // ── Toast ────────────────────────────────────────────────
-    let toastTimer;
-    function showToast(msg, type = 'success') {
-      const toast = document.getElementById('toast');
-      const icon = document.getElementById('toastIcon');
-      const msgEl = document.getElementById('toastMsg');
-      const icons = { success: 'check_circle', error: 'error', info: 'info' };
-      const colors = { success: '#4ade80', error: '#f87171', info: '#60a5fa' };
-      icon.textContent = icons[type] || 'info';
-      icon.style.color = colors[type] || '#60a5fa';
-      msgEl.textContent = msg;
-      toast.classList.add('show');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => toast.classList.remove('show'), 4000);
-    }
+### 🧑‍🤝‍🧑 For Citizens (User Dashboard)
+* **Snap & Report:** Instantly report community issues with Auto-GPS location detection and live photo uploads.
+* **Bayanihan Sari-Sari Store:** Earn "Hero Points" for every verified report and redeem them for essential goods via digital vouchers.
+* **Live Community Map:** See what's happening around your neighborhood in real-time.
+* **Secure OTP Login:** Safe and verified user registration via Email OTP.
+* **Community Feed:** Stay updated on public projects and community news verified by the LGU.
 
-    // ── UI Helpers ──────────
-    function goBackToStep1() {
-      document.getElementById('signupStep2').classList.add('hidden');
-      document.getElementById('signupStep1').classList.remove('hidden');
-      showToast('Maaari mo nang i-edit ang iyong details.', 'info');
-    }
+### 🏛️ For LGU Administrators (Command Center)
+* **Incident Ledger:** Triage, verify, and resolve community tickets in a streamlined interface.
+* **Live Dispatch Map:** Pinpoint exactly where action is needed and track pending vs. in-progress tasks.
+* **Transparency Record:** A permanent public ledger of all resolved issues to build public trust.
+* **Store Inventory Management:** Manage the rewards and stocks available for active citizens.
+* **System Settings & Support:** Built-in bug reporting and account configurations.
 
-    // 1. Switch between Login and Signup modals
-    function switchModal(closeId, openId) {
-    closeModal(closeId);
-    setTimeout(() => openModal(openId), 300);
-    }
+---
 
-    // 2. Handle Login (Connecting to app.py)
-    async function handleLogin(e) {
-      e.preventDefault();
-      
-      const email = document.getElementById('loginEmail').value;
-      const password = document.getElementById('loginPassword').value;
+## 💻 Tech Stack
 
-      if (!email || !password) {
-        showToast('Please enter both email and password.', 'error');
-        return;
-      }
+This project was built with a **"Tech 4 Less"** and frugal innovation mindset, ensuring that LGUs with limited budgets can deploy this solution without expensive cloud dependencies.
 
-      showToast('Logging in...', 'info');
+* **Frontend:** HTML5, Tailwind CSS, Vanilla JavaScript
+* **Backend:** Python, Flask (Werkzeug/Jinja2)
+* **Database:** SQLite / SQLAlchemy (Production-ready for PostgreSQL migration)
+* **Mapping/GIS:** Leaflet.js & OpenStreetMap (Free & Open Source)
+* **Authentication:** Flask-Mail (Email OTP Verification)
 
-      try {
-        const response = await fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
+---
 
-        const data = await response.json();
+## 🚀 How to Run Locally
 
-        if (response.ok) {
-            closeModal('loginModal');
-            showToast('Welcome back! Redirecting...', 'success');
-            setTimeout(() => {
-                window.location.href = data.redirect_url; 
-            }, 1000);
-        } else {
-            showToast(data.error || 'Invalid credentials.', 'error');
-        }
-      } catch (error) {
-          console.error('Error:', error);
-          showToast('Server error. Is Python running?', 'error');
-      }
-    }
+Follow these steps to run BayanihanHub on your local machine:
 
-    // 3. Trigger OTP (Fixed ID reference)
-    async function triggerOTP() {
-      const name = document.getElementById('regName').value;
-      const email = document.getElementById('regEmail').value;
-      const password = document.getElementById('regPass').value; // Now matches id="regPass"
-      const phone = document.getElementById('phoneNumber').value;
+**1. Clone the repository**
+```bash
+git clone [https://github.com/ZRayce/BayanihanHub_HACKUSC.git](https://github.com/ZRayce/BayanihanHub_HACKUSC.git)
+cd BayanihanHub_HACKUSC
 
-      if(!name || !email || !password || !phone) {
-          showToast('Please fill in all fields.', 'error');
-          return;
-      }
+**2. Create a Virtual Environment**
+```bash
+python -m venv venv
+source venv/Scripts/activate  # For Linux/Mac
+venv\Scripts\activate         # For Windows
 
-      showToast('Sending OTP to your email...', 'info');
+**3. Install Dependencies**
+```bash
+pip install -r requirements.txt
 
-      const response = await fetch('/api/send-otp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, password, phone })
-      });
+**4. Set up Environment Variables**
+Create a .env file in the root directory (or export directly) for the Email OTP and Admin features:
 
-      if (response.ok) {
-          document.getElementById('signupStep1').classList.add('hidden');
-          document.getElementById('signupStep2').classList.remove('hidden');
-          showToast('OTP sent successfully!', 'success');
-      } else {
-          const errorData = await response.json();
-          showToast(errorData.error || 'Failed to send OTP.', 'error');
-      }
-    }
+Code snippet
+MAIL_USERNAME=admin.bayanihanhub@cebu.gov.ph
+MAIL_PASSWORD=your_16_character_app_password
 
-    // 4. Handle Final Sign Up Verification
-    async function handleSignupSubmit(e) {
-      e.preventDefault();
-      const phone = document.getElementById('phoneNumber').value;
-      const code = document.getElementById('otpCodeInput').value;
+**5. Run the Application**
+```bash
+python app.py
+The app will run on http://127.0.0.1:5000
 
-      const response = await fetch('/api/verify-otp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ phone, code })
-      });
+**🔑 Demo Credentials**
+To access the Command Center during the demo:
 
-      const data = await response.json();
-      if (response.ok) {
-          showToast('Account created! 🎉', 'success');
-          setTimeout(() => {
-              window.location.href = data.redirect_url;
-          }, 1500);
-      } else {
-          showToast(data.error || 'Verification failed.', 'error');
-        }
-      }
-  </script>#   B a y a n i h a n H u b _ H A C K U S C  
- 
+Admin Email: admin.bayanihanhub@cebu.gov.ph
+
+Admin Password: Bayanihan_Secure_2026!
+
+**👥 Meet The Team**
+We are a team of first-year students from the Department of Computer Information Sciences and Mathematics at the University of San Carlos, united by a passion for civic tech and community building.
+
+Rayce Manuel E. Fillon
+BS Information Technology - Year 1
+📧 25104293@usc.edu.ph
+
+Kris Andrie Ortega
+BS Computer Science - Year 1
+📧 25101270@usc.edu.ph
+
+Christopher Michael O. Magadan
+BS Information Systems - Year 1
+📧 25102550@usc.edu.ph
