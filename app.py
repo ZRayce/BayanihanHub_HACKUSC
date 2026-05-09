@@ -14,8 +14,16 @@ app = Flask(__name__, template_folder='templates', static_folder='static')
 
 # --- CONFIGURATION (Render Friendly) ---
 app.secret_key = os.environ.get('SECRET_KEY', 'bayanihan_hub_secret_key_2026')
+
+# 🔥 RENDER SESSION FIX: Para hindi ma-kick out pabalik sa landing page
+app.config.update(
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+)
+
 GMAIL_USER = os.environ.get('MAIL_USERNAME', 'noreply.bayanihanhub@gmail.com') 
-GMAIL_PASS = os.environ.get('MAIL_PASSWORD', 'fjom yntw wsca nlhf')       
+GMAIL_PASS = os.environ.get('MAIL_PASSWORD', 'fjomyntwwscanlhf') # Siguraduhing walang spaces sa Render!
 
 # --- DATABASE SETUP ---
 def get_db_connection():
@@ -96,10 +104,10 @@ def login_required(f):
     return decorated_function
 
 # --- PRODUCTION EMAIL SENDER ---
-def send_email_otp(receiver_email, otp):
+def send_email_otp(receiver_email, otp, subject='Verification Code'):
     try:
         msg = MIMEMultipart('alternative')
-        msg['Subject'] = f'Verification Code: {otp}'
+        msg['Subject'] = f'{subject}: {otp}'
         msg['From'] = f'"BayanihanHub Official" <{GMAIL_USER}>'
         msg['To'] = receiver_email
         
@@ -110,7 +118,7 @@ def send_email_otp(receiver_email, otp):
               <div style="background-color: #6d28d9; padding: 30px; text-align: center;"><h1 style="color: white; margin: 0;">BayanihanHub</h1></div>
               <div style="padding: 40px; text-align: center;">
                 <h2 style="color: #1e293b;">Maayong adlaw!</h2>
-                <p style="color: #64748b;">Gamita kini nga code para ma-verify ang imong account:</p>
+                <p style="color: #64748b;">Gamita kini nga code para sa imong account:</p>
                 <div style="background-color: #f1f5f9; padding: 20px; border-radius: 16px; margin: 24px 0; font-size: 32px; font-weight: 800; letter-spacing: 8px; color: #6d28d9; border: 1px dashed #cbd5e1;">{otp}</div>
                 <p style="font-size: 12px; color: #94a3b8;">If you didn't request this, please ignore this email.</p>
               </div>
@@ -120,7 +128,7 @@ def send_email_otp(receiver_email, otp):
         """
         msg.attach(MIMEText(html, 'html'))
         
-        # SSL Port 465 is more reliable on Render/Cloud environments
+        # SSL Port 465 is more reliable on Render
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
             server.login(GMAIL_USER, GMAIL_PASS)
             server.sendmail(GMAIL_USER, receiver_email, msg.as_string())
@@ -146,7 +154,7 @@ def send_otp():
     
     otp_code = str(random.randint(100000, 999999))
 
-    # --- HACKATHON BACKUP LOGGING (Check Render logs for this!) ---
+    # --- HACKATHON BACKUP LOGGING ---
     print(f"\n🚀 [DEMO LOG] OTP FOR {email}: {otp_code}\n")
 
     try:
@@ -156,7 +164,6 @@ def send_otp():
         conn.commit()
         conn.close()
 
-        # Background Threading for Email
         def run_email_in_thread(app_instance, target_email, code):
             with app_instance.app_context():
                 success = send_email_otp(target_email, code)
@@ -177,8 +184,7 @@ def verify_otp():
     phone = data.get('phone')
     user_code = data.get('code')
     
-    # 🔥 HACKATHON MASTER BYPASS (LIFESAVER!)
-    # Logic: If 123456 is used, it attempts to register the user from the last temp_data
+    # 🔥 HACKATHON MASTER BYPASS
     is_bypass = (user_code == '123456')
 
     conn = get_db_connection()
@@ -188,21 +194,20 @@ def verify_otp():
         user_details = json.loads(record['temp_data'])
         hashed_pw = generate_password_hash(user_details['password'])
         try:
-            # Register the user
             conn.execute('INSERT OR IGNORE INTO users (full_name, email, phone_number, password_hash, role) VALUES (?, ?, ?, ?, "citizen")',
                          (user_details['name'], user_details['email'], phone, hashed_pw))
-            
-            # Clean up the OTP request
             conn.execute('DELETE FROM otp_requests WHERE phone_number = ?', (phone,))
             conn.commit()
             
-            # Auto-login after registration
             user = conn.execute('SELECT user_id, role FROM users WHERE phone_number = ?', (phone,)).fetchone()
+            
+            # 🔥 SESSION FIX
+            session.permanent = True
             session['user_id'] = user['user_id']
             session['role'] = user['role']
             
             conn.close()
-            return jsonify({"message": "Success", "redirect_url": "/user-dashboard"}), 200
+            return jsonify({"message": "Success", "redirect_url": "/User_Dashboard"}), 200
         except sqlite3.IntegrityError:
             conn.close()
             return jsonify({"error": "User already exists"}), 400
@@ -221,12 +226,89 @@ def login():
     conn.close()
 
     if user and check_password_hash(user['password_hash'], password):
+        # 🔥 SESSION FIX
+        session.permanent = True
         session['user_id'] = user['user_id']
         session['role'] = user['role']
         url = '/Admin_Dashboard' if user['role'] == 'official' else '/User_Dashboard'
         return jsonify({"message": "Login Success", "redirect_url": url}), 200
     
     return jsonify({"error": "Incorrect email or password."}), 401
+
+# 🔥 BINALIK: FORGOT PASSWORD ROUTE
+@app.route('/api/forgot-password', methods=['POST'])
+def forgot_password():
+    data = request.json
+    email = data.get('email')
+        
+    conn = get_db_connection()
+    user = conn.execute('SELECT * FROM users WHERE email = ?', (email,)).fetchone()
+        
+    if not user:
+        conn.close()
+        return jsonify({"error": "Hindi namin mahanap ang email na ito."}), 404
+            
+    otp_code = str(random.randint(100000, 999999))
+        
+    print(f"\n🔑 [PASSWORD RESET] OTP FOR {email}: {otp_code}\n")
+    
+    try:
+        conn.execute('INSERT OR REPLACE INTO otp_requests (phone_number, otp_code, temp_data) VALUES (?, ?, ?)',
+                     (email, otp_code, 'reset_password'))
+        conn.commit()
+        conn.close()
+            
+        def run_email_in_thread(app_instance, target_email, code):
+            with app_instance.app_context():
+                send_email_otp(target_email, code, "Reset Password Code")
+
+        threading.Thread(target=run_email_in_thread, args=(app._get_current_object(), email, otp_code)).start() 
+
+        return jsonify({"message": "Reset code sent!"}), 200
+    except Exception as e:
+        return jsonify({"error": "Failed to generate reset code."}), 500
+
+# 🔥 BINALIK: RESET PASSWORD ROUTE
+@app.route('/api/reset-password', methods=['POST'])
+def reset_password():
+    data = request.json
+    email = data.get('email')
+    code = data.get('code')
+    new_password = data.get('new_password')
+        
+    conn = get_db_connection()
+    record = conn.execute('SELECT * FROM otp_requests WHERE phone_number = ?', (email,)).fetchone()
+        
+    if record and record['otp_code'] == code and record['temp_data'] == 'reset_password':
+        hashed_pw = generate_password_hash(new_password)
+        conn.execute('UPDATE users SET password_hash = ? WHERE email = ?', (hashed_pw, email))
+        conn.execute('DELETE FROM otp_requests WHERE phone_number = ?', (email,))
+        conn.commit()
+        conn.close()
+        return jsonify({"message": "Password updated successfully!"}), 200
+        
+    conn.close()
+    return jsonify({"error": "Invalid or expired code."}), 400
+
+# 🔥 BINALIK: UPDATE STATUS ROUTE (For Admin Reports)
+@app.route('/api/update-status', methods=['POST'])
+@login_required
+def update_status():
+    if session.get('role') != 'official':
+        return jsonify({"error": "Unauthorized"}), 403
+        
+    data = request.json
+    report_id = data.get('report_id')
+    new_status = data.get('status')
+    
+    try:
+        conn = get_db_connection()
+        conn.execute('UPDATE reports SET status = ? WHERE report_id = ?', (new_status, report_id))
+        conn.commit()
+        conn.close()
+        return jsonify({"message": "Status updated!"}), 200
+    except Exception as e:
+        return jsonify({"error": "Database error"}), 500
 
 # --- BLUEPRINTS ---
 from user import user_bp
