@@ -669,11 +669,11 @@
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
 
-            // HACKATHON MAGIC: Admin Shortcut
+           // HACKATHON MAGIC: Admin Shortcut
             if(email === 'admin.bayanihanhub@cebu.gov.ph' && password === 'Bayanihan_Secure_2026!') {
                 showToast('Welcome Admin!', 'success');
                 closeModal('loginModal'); startLoading();
-                setTimeout(() => { window.location.href = '/admin-dashboard'; }, 1500); return;
+                setTimeout(() => { window.location.href = '/Admin_Dashboard'; }, 1500); return; // 👈 Pinalitan ng /Admin_Dashboard
             }
 
             showToast('Verifying identity...', 'info');
