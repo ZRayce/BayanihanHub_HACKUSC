@@ -210,7 +210,7 @@
                 </div>
             </div>
 
-            <!-- ─── TAB 3: STORE INVENTORY (ACCURATE WITH USER) ─── -->
+            <!-- ─── TAB 3: STORE INVENTORY ─── -->
             <div id="view-inventory" class="hidden animate-fade">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 px-2">
                     <div>
@@ -286,21 +286,6 @@
                 </div>
             </div>
 
-            <!-- ─── TAB 4: MISSION & VISION ─── -->
-            <div id="view-about" class="hidden animate-fade">
-                <div class="max-w-4xl mx-auto space-y-6">
-                    <div class="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-sm border border-slate-200 text-center relative overflow-hidden">
-                        <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-violet-600 to-indigo-600"></div>
-                        <img src="{{ url_for('static', filename='Images/BAYANIHANHUB_LOGO.png') }}" class="w-24 h-24 mx-auto mb-6 drop-shadow-lg" onerror="this.src='https://via.placeholder.com/100?text=BH'">
-                        <h2 class="text-3xl md:text-4xl font-black text-slate-800 tracking-tight mb-4" data-en="Our Mission" data-ceb="Atong Misyon">Our Mission</h2>
-                        <p class="text-slate-600 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mx-auto" data-en="To empower citizens and LGUs through a transparent, fast, and unified community response system." data-ceb="Ang paghatag og gahum sa mga lumulupyo ug LGU pinaagi sa usa ka transparent, paspas, ug nahiusa nga sistema.">To empower citizens and LGUs through a transparent, fast, and unified community response system.</p>
-                    </div>
-                    <div class="bg-gradient-to-br from-violet-700 to-indigo-800 p-8 md:p-12 rounded-[2.5rem] shadow-xl text-center text-white relative overflow-hidden">
-                        <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-4 flex items-center justify-center gap-3"><span class="material-symbols-outlined text-4xl text-violet-300">visibility</span> <span data-en="Our Vision" data-ceb="Atong Panan-awon">Our Vision</span></h2>
-                        <p class="text-violet-100 text-lg md:text-xl font-medium leading-relaxed max-w-2xl mx-auto" data-en="A smart and resilient barangay driven by citizen participation and powered by accessible technology." data-ceb="Usa ka maalamon ug lig-on nga barangay nga gipalihok sa aktibong partisipasyon sa mga lumulupyo.">A smart and resilient barangay driven by citizen participation and powered by accessible technology.</p>
-                    </div>
-                </div>
-            </div>
         </div>
     </main>
 
@@ -383,6 +368,10 @@
                 if(el.tagName.toLowerCase() === 'option') el.innerText = el.getAttribute(`data-${currentLang}`);
                 else el.innerHTML = el.getAttribute(`data-${currentLang}`);
             });
+            let activeTitleElement = document.getElementById('headerTitle');
+            if(activeTitleElement) {
+                 activeTitleElement.innerText = activeTitleElement.getAttribute(`data-${currentLang}`);
+            }
         }
 
         function showToast(msg, isError = false) {
@@ -394,14 +383,38 @@
             setTimeout(() => toast.classList.add('opacity-0', '-translate-y-5'), 3000);
         }
 
+        // 🔥 NAYOS NA ANG TAB SWITCHING
         function switchTab(tabName) {
             if(window.innerWidth < 768) { toggleSidebar(); }
-            ['live', 'transparency', 'inventory', 'about'].forEach(t => {
-                document.getElementById(`view-${t}`).classList.add('hidden');
-                document.getElementById(`tab-${t}`).className = "w-full flex items-center gap-3.5 px-4 py-4 rounded-2xl font-bold text-sm border transition-all tab-inactive group";
+            
+            // 1. I-hide lahat ng views at i-deactivate ang buttons
+            ['live', 'transparency', 'inventory'].forEach(t => {
+                let view = document.getElementById(`view-${t}`);
+                if(view) view.classList.add('hidden');
+                
+                let tabBtn = document.getElementById(`tab-${t}`);
+                if(tabBtn) tabBtn.className = "w-full flex items-center gap-3.5 px-4 py-4 rounded-2xl font-bold text-sm border transition-all tab-inactive group active:scale-95";
             });
-            document.getElementById(`view-${tabName}`).classList.remove('hidden');
-            document.getElementById(`tab-${tabName}`).className = "w-full flex items-center gap-3.5 px-4 py-4 rounded-2xl font-bold text-sm border transition-all tab-active group";
+
+            // 2. I-show ang piniling view
+            let targetView = document.getElementById(`view-${tabName}`);
+            if(targetView) targetView.classList.remove('hidden');
+            
+            // 3. I-highlight ang piniling button
+            let targetTabBtn = document.getElementById(`tab-${tabName}`);
+            if(targetTabBtn) targetTabBtn.className = "w-full flex items-center gap-3.5 px-4 py-4 rounded-2xl font-bold text-sm border transition-all tab-active group active:scale-95";
+
+            // 4. Update Header Title
+            let titles = {'live': 'Live Incidents', 'transparency': 'Transparency Record', 'inventory': 'Store Inventory'};
+            let cebTitles = {'live': 'Mga Aktibong Insidente', 'transparency': 'Rekord sa Transparensya', 'inventory': 'Imbentaryo sa Tindahan'};
+            
+            let headerTitle = document.getElementById('headerTitle');
+            if(headerTitle) {
+                headerTitle.setAttribute('data-en', titles[tabName]);
+                headerTitle.setAttribute('data-ceb', cebTitles[tabName]);
+                headerTitle.innerText = currentLang === 'en' ? titles[tabName] : cebTitles[tabName];
+            }
+
             if(tabName === 'live') { setTimeout(() => map.invalidateSize(), 100); } 
             document.getElementById('mainScroll').scrollTo(0,0);
         }
@@ -434,21 +447,44 @@
                 let allReports = [...dbReports, ...dummyReports];
                 currentMarkers.forEach(m => map.removeLayer(m)); currentMarkers = [];
                 let pending = 0, inprogress = 0, resolved = 0;
+                
                 const activeContainer = document.getElementById('activeTicketsTable');
                 const resolvedTable = document.getElementById('resolvedTicketsTable');
-                activeContainer.innerHTML = ''; resolvedTable.innerHTML = '';
+                
+                activeContainer.innerHTML = ''; 
+                resolvedTable.innerHTML = '';
 
                 allReports.forEach(report => {
                     const rId = report.report_id;
                     if(localAdminState[rId]) { report.status = localAdminState[rId]; }
                     const urgency = getUrgency(report.category);
-                    if(report.status === 'Pending') pending++; else if(report.status === 'In Progress') inprogress++; else resolved++;
+                    
+                    if(report.status === 'Pending') pending++; 
+                    else if(report.status === 'In Progress') inprogress++; 
+                    else resolved++;
 
                     const dateStr = new Date(report.timestamp).toLocaleDateString();
                     const imageHtml = report.image_path ? `<img src="${report.image_path}" class="w-16 h-16 rounded-xl object-cover border border-slate-200">` : `<div class="w-16 h-16 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300"><span class="material-symbols-outlined">image</span></div>`;
 
                     if(report.status === 'Resolved') {
-                        resolvedTable.innerHTML += `<tr class="hover:bg-slate-50"><td class="p-4 flex items-center gap-4">${imageHtml}<div><p class="font-black text-slate-800 text-sm">#REP-${rId}</p><p class="text-[10px] text-slate-400 font-bold">${dateStr}</p></div></td><td class="p-4"><p class="font-bold text-slate-700 text-xs">${report.category}</p><p class="text-[10px] text-slate-500 line-clamp-1">${report.location}</p></td><td class="p-4"><span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-black border border-emerald-100 uppercase">Verified Resolved</span></td></tr>`;
+                        // THIS POPULATES THE TRANSPARENCY TAB
+                        resolvedTable.innerHTML += `
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="p-4 flex items-center gap-4">
+                                ${imageHtml}
+                                <div>
+                                    <p class="font-black text-slate-800 text-sm">#REP-${rId}</p>
+                                    <p class="text-[10px] text-slate-400 font-bold">${dateStr}</p>
+                                </div>
+                            </td>
+                            <td class="p-4">
+                                <p class="font-bold text-slate-700 text-xs">${report.category}</p>
+                                <p class="text-[10px] text-slate-500 line-clamp-1">${report.location}</p>
+                            </td>
+                            <td class="p-4">
+                                <span class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-black border border-emerald-100 uppercase">Verified Resolved</span>
+                            </td>
+                        </tr>`;
                     } else {
                         const markerIcon = report.status === 'In Progress' ? orangeIcon : redIcon;
                         const marker = L.marker([10.3157 + (Math.random()*0.02 - 0.01), 123.8854 + (Math.random()*0.02 - 0.01)], {icon: markerIcon}).bindPopup(`<b>#REP-${rId}</b><br>${report.category}`).addTo(map);
