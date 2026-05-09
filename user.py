@@ -24,7 +24,7 @@ def login_required(f):
 
 # --- USER ROUTES ---
 
-@user_bp.route('/user-dashboard')
+@user_bp.route('/User_Dashboard')
 @login_required
 def user_dashboard():
     conn = get_db_connection()
