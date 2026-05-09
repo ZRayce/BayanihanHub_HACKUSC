@@ -1,4 +1,4 @@
-# 🌟 BayanihanHub
+# BayanihanHub
 
 <div align="center">
   <img src="static/Images/BAYANIHANHUB_LOGO.png" alt="BayanihanHub Logo" width="150"/>
@@ -62,16 +62,19 @@ Follow these steps to run BayanihanHub on your local machine:
 ```bash
 git clone [https://github.com/ZRayce/BayanihanHub_HACKUSC.git](https://github.com/ZRayce/BayanihanHub_HACKUSC.git)
 cd BayanihanHub_HACKUSC
+```
 
 **2. Create a Virtual Environment**
 ```bash
 python -m venv venv
 source venv/Scripts/activate  # For Linux/Mac
 venv\Scripts\activate         # For Windows
+```
 
 **3. Install Dependencies**
 ```bash
 pip install -r requirements.txt
+```
 
 **4. Set up Environment Variables**
 Create a .env file in the root directory (or export directly) for the Email OTP and Admin features:
@@ -84,6 +87,7 @@ MAIL_PASSWORD=your_16_character_app_password
 ```bash
 python app.py
 The app will run on http://127.0.0.1:5000
+```
 
 **🔑 Demo Credentials**
 To access the Command Center during the demo:
