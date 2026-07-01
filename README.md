@@ -99,14 +99,8 @@ Admin Password: Bayanihan_Secure_2026!
 **👥 Meet The Team**
 We are a team of first-year students from the Department of Computer Information Sciences and Mathematics at the University of San Carlos, united by a passion for civic tech and community building.
 
-Rayce Manuel E. Fillon
-BS Information Technology - Year 1
-📧 25104293@usc.edu.ph
 
 Kris Andrie Ortega
-BS Computer Science - Year 1
-📧 25101270@usc.edu.ph
 
 Christopher Michael O. Magadan
-BS Information Systems - Year 1
-📧 25102550@usc.edu.ph
+
